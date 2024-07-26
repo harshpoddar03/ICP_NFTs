@@ -5,9 +5,7 @@
   },
   "name": "ICP_NFTs",
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "prebuild": "npm run prebuild --workspaces --if-present",
-    "pretest": "npm run prebuild --workspaces --if-present",
+    "build": "dfx generate && cd src/ICP_NFTs_frontend && npm run build",
     "start": "npm start --workspaces --if-present",
     "test": "npm test --workspaces --if-present"
   },
