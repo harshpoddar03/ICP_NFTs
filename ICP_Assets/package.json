@@ -1,0 +1,16 @@
+{
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "name": "ICP_Assets",
+  "scripts": {
+    "build": "dfx generate && cd src/ICP_Assets_frontend && npm run build",
+    "start": "npm start --workspaces --if-present",
+    "test": "npm test --workspaces --if-present"
+  },
+  "type": "module",
+  "workspaces": [
+    "src/ICP_Assets_frontend"
+  ]
+}
