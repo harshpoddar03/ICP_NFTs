@@ -6,10 +6,11 @@ import './index.scss';
 console.log('Inside main.jsx');
 
 try {
-  ReactDOM.createRoot(document.getElementById('root')).render(
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(
     <React.StrictMode>
       <App />
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 } catch (error) {
   console.error('Error rendering App:', error);

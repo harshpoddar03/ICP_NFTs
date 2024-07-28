@@ -7,50 +7,126 @@ import { idlFactory } from '../../declarations/ICP_NFTs_backend/ICP_NFTs_backend
 
 
 const NFTMinter = () => {
-  const [authClient, setAuthClient] = useState(null);
+  const [authClient , setAuthClient] = useState(null);
   const [actor, setActor] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [nftContent, setNftContent] = useState('');
   const [mintedTokenId, setMintedTokenId] = useState(null);
 
+  // const [tempauthClient, setTempAuthClient] = useState(null);
+
+
+  console.log('Inside NFTMinter');
+
   useEffect(() => {
     const initAuth = async () => {
-      const client = await AuthClient.create();
-      setAuthClient(client);
+      try {
+        const client = await AuthClient.create();
+        setAuthClient(client);
+        console.log('AuthClient created:', client);
 
-      if (await client.isAuthenticated()) {
-        handleAuthenticated(client);
+        if (await client.isAuthenticated()) {
+          handleAuthenticated(client);
+        }
+      } catch (error) {
+        console.error('Error creating AuthClient:', error);
       }
     };
 
     initAuth();
   }, []);
 
-  const handleAuthenticated = async (client) => {
-    const identity = await client.getIdentity();
-    const agent = new HttpAgent.create({ identity });
-    
-    // Fetch root key for local development
-    if (process.env.DFX_NETWORK !== "ic") {
-      await agent.fetchRootKey();
+  const handleAuthReturn = async () => {
+    console.log('Handling auth return...');
+    const isAuth = await authClient.isAuthenticated();
+    console.log(`Authentication status: ${isAuth}`);
+
+    if (isAuth) {
+      console.log('User is authenticated, calling handleAuthenticated...');
+      await handleAuthenticated(authClient);
+    } else {
+      console.log('User is not authenticated after return');
     }
-    
-    const actor = Actor.createActor(idlFactory, {
-      agent,
-      canisterId: process.env.CANISTER_ID_ICP_NFTS_BACKEND,
-    });
-    setActor(actor);
-    setIsAuthenticated(true);
+
+    // Clear the hash to avoid handling auth return multiple times
+    window.location.hash = '';
   };
 
+  // Use an effect to check for auth return
+  useEffect(() => {
+    if (window.location.hash === '#auth-return' && authClient) {
+      handleAuthReturn();
+    }
+  }, [authClient]);
+
+  const handleAuthenticated = async (client) => {
+      console.log('inside handleAuthenticated');
+      try {
+        const identity = await client.getIdentity();
+        console.log('Authenticated with identity:', identity.getPrincipal().toText());
+  
+        const agent = new HttpAgent({ identity });
+        console.log('Agent created:', agent);
+        if('fetchRootKey' in agent) {
+          console.log('fetchRootKey exists in agent');
+        } else {
+          console.log('fetchRootKey does not exist in agent');
+        }
+        if (process.env.DFX_NETWORK !== "ic") {
+          await agent.fetchRootKey();
+          console.log('Root key fetched for local development');
+        }
+  
+        const newActor = Actor.createActor(idlFactory, {
+          agent,
+          canisterId: process.env.CANISTER_ID_ICP_NFTS_BACKEND,
+        });
+        console.log('Actor created');
+        setActor(newActor);
+        setIsAuthenticated(true);
+        console.log('Authentication process completed');
+      } catch (error) {
+        console.error('Error in handleAuthenticated:', error);
+      }
+  }
+
+
   const login = async () => {
-    await authClient.login({
-      identityProvider: process.env.DFX_NETWORK === "ic" 
-        ? "https://identity.ic0.app/#authorize" 
-        : `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}#authorize`,
-      onSuccess: () => handleAuthenticated(authClient),
-    });
+    console.log('inside login');
+    if (!authClient) {
+      console.error('AuthClient not initialized');
+      return;
+    }
+
+    const identityProviderUrl = process.env.DFX_NETWORK === "ic"
+      ? "https://identity.ic0.app/#authorize"
+      : `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}#authorize`;
+
+    console.log('identityProviderUrl:', identityProviderUrl);
+
+    // Specify the URL to return to after authentication
+    const redirectUrl = new URL(window.location.href);
+    redirectUrl.hash = 'auth-return';
+
+    try {
+      console.log('Initiating login process...');
+      await authClient.login({
+        identityProvider: identityProviderUrl,
+        maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000), // 7 days
+        redirectUrl: redirectUrl.toString(),
+      });
+      
+      // The page will redirect, so the code below won't execute immediately
+      console.log('Redirect should have happened');
+      handleAuthenticated(authClient);
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
   };
+
+
+  // const isNowAuthenticated = authClient.isAuthenticated();
+  // console.log(`Is now authenticated: ${isNowAuthenticated}`);
 
   const mintNFT = async () => {
     if (!actor) return;
@@ -98,6 +174,14 @@ const NFTMinter = () => {
           )}
         </div>
       )}
+      <button onClick={async () => {
+      if (authClient) {
+        const isAuth = await authClient.isAuthenticated();
+        console.log(`Current authentication status: ${isAuth}`);
+      } else {
+        console.log('AuthClient not initialized');
+      }
+    }}>Check Auth Status</button>
     </div>
   );
 };
