@@ -18,7 +18,7 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'src/index.html'),
       },
-      external: ['@dfinity/auth-client', '@dfinity/identity', '@dfinity/agent', '@dfinity/principal'],
+      // external: ['@dfinity/auth-client', '@dfinity/identity', '@dfinity/agent', '@dfinity/principal'],
     },
   },
   optimizeDeps: {
@@ -27,7 +27,7 @@ export default defineConfig({
         global: 'globalThis',
       },
     },
-    include: ['@dfinity/agent', '@dfinity/candid', '@dfinity/principal'],
+    include: ['@dfinity/agent', '@dfinity/candid', '@dfinity/principal', '@dfinity/auth-client', '@dfinity/identity'],
   },
   server: {
     proxy: {
