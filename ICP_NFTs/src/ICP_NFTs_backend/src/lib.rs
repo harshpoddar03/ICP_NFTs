@@ -1,5 +1,4 @@
-
-// use ic_cdk::export_candid;
+use ic_cdk::export_candid;
 use std::collections::HashMap;
 use std::cell::RefCell;
 use candid::Principal;
@@ -7,12 +6,10 @@ use candid::CandidType;
 use serde::Deserialize;
 use candid;
 
-
-
 #[derive(CandidType, Deserialize)]
 struct NFT {
     owner: Principal,
-    metadata: String,
+    content: String,
 }
 
 thread_local! {
@@ -32,9 +29,9 @@ impl NFTContract {
         }
     }
 
-    fn mint(&mut self, owner: Principal, metadata: String) -> u64 {
+    fn mint(&mut self, owner: Principal, content: String) -> u64 {
         let token_id = self.next_token_id;
-        self.tokens.insert(token_id, NFT { owner, metadata });
+        self.tokens.insert(token_id, NFT { owner, content });
         self.next_token_id += 1;
         token_id
     }
@@ -53,21 +50,20 @@ impl NFTContract {
         self.tokens.remove(&token_id).is_some()
     }
 
-    fn get_metadata(&self, token_id: u64) -> Option<String> {
-        self.tokens.get(&token_id).map(|nft| nft.metadata.clone())
+    fn get_content(&self, token_id: u64) -> Option<String> {
+        self.tokens.get(&token_id).map(|nft| nft.content.clone())
     }
 }
 
 #[ic_cdk::query]
-fn get_token_metadata(token_id: u64) -> Option<String> {
-    NFT_CONTRACT.with(|contract| contract.borrow().get_metadata(token_id))
+fn get_token_content(token_id: u64) -> Option<String> {
+    NFT_CONTRACT.with(|contract| contract.borrow().get_content(token_id))
 }
 
-
 #[ic_cdk::update]
-fn mint_nft(metadata: String) -> u64 {
+fn mint_nft(content: String) -> u64 {
     let owner = ic_cdk::caller();
-    NFT_CONTRACT.with(|contract| contract.borrow_mut().mint(owner, metadata))
+    NFT_CONTRACT.with(|contract| contract.borrow_mut().mint(owner, content))
 }
 
 #[ic_cdk::update]
@@ -83,4 +79,3 @@ fn burn_nft(token_id: u64) -> bool {
 
 // Candid export
 ic_cdk::export_candid!();
-

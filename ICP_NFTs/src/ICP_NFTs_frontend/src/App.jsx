@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ICP_NFTs_backend } from 'declarations/ICP_NFTs_backend';
+import NFTMinter from './NFT_Minter';
 
 function App() {
   const [greeting, setGreeting] = useState('');
-
+  console.log('greeting:', greeting);
   function handleSubmit(event) {
     event.preventDefault();
     const name = event.target.elements.name.value;
@@ -24,6 +25,10 @@ function App() {
         <button type="submit">Click Me!</button>
       </form>
       <section id="greeting">{greeting}</section>
+      
+      <hr />
+      
+      <NFTMinter />
     </main>
   );
 }
