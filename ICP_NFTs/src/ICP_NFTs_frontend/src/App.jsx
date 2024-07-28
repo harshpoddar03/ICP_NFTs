@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-// import { ICP_NFTs_backend } from 'declarations/ICP_NFTs_backend';
+import { ICP_NFTs_backend } from 'declarations/ICP_NFTs_backend';
 import NFTMinter from './NFT_Minter';
 
-console.log('App.jsx is being executed');
-let ICP_NFTs_backend;
-try {
-  ICP_NFTs_backend = require('declarations/ICP_NFTs_backend').ICP_NFTs_backend;
-  console.log('Backend imported successfully');
-} catch (error) {
-  console.error('Error importing backend:', error);
-}
+// console.log('App.jsx is being executed');
+// let ICP_NFTs_backend;
+// try {
+//   ICP_NFTs_backend = require('declarations/ICP_NFTs_backend').ICP_NFTs_backend;
+//   console.log('Backend imported successfully');
+// } catch (error) {
+//   console.error('Error importing backend:', error);
+// }
 
 function App() {
   const [greeting, setGreeting] = useState('');
