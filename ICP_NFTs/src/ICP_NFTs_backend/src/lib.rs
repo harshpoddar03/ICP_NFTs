@@ -1,4 +1,5 @@
 use ic_cdk::export_candid;
+use ic_cdk::print;
 use std::collections::HashMap;
 use std::cell::RefCell;
 use candid::Principal;
@@ -57,13 +58,16 @@ impl NFTContract {
 
 #[ic_cdk::query]
 fn get_token_content(token_id: u64) -> Option<String> {
-    NFT_CONTRACT.with(|contract| contract.borrow().get_content(token_id))
+    println!("Attempting to get content for token ID: {}", token_id);
+    let result = NFT_CONTRACT.with(|contract| contract.borrow().get_content(token_id));
+    println!("Result: {:?}", result);
+    result
 }
-
 #[ic_cdk::update]
-fn mint_nft(content: String) -> u64 {
-    let owner = ic_cdk::caller();
-    NFT_CONTRACT.with(|contract| contract.borrow_mut().mint(owner, content))
+fn mint_nft(owner: Principal, content: String) -> (u64, String) {
+    let token_id = NFT_CONTRACT.with(|contract| contract.borrow_mut().mint(owner, content.clone()));
+    println!("Minted NFT with ID: {} and content: {}", token_id, content);
+    (token_id, content)
 }
 
 #[ic_cdk::update]
@@ -78,4 +82,25 @@ fn burn_nft(token_id: u64) -> bool {
 }
 
 // Candid export
-ic_cdk::export_candid!();
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn generate_candid() {
+        use std::env;
+        use std::fs::write;
+        use std::path::PathBuf;
+
+        let dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+        let dir = dir.parent().unwrap().join("ICP_NFTs_backend");
+        print!("{:?}", dir);
+        write(dir.join("ICP_NFTs_backend.did"), export_candid()).expect("Write failed.");
+    }
+}
+
+// Make sure this function is available
+pub fn export_candid() -> String {
+    candid::export_service!();
+    __export_service()
+}

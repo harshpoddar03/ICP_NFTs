@@ -65,7 +65,7 @@ const NFTMinter = () => {
         const identity = await client.getIdentity();
         console.log('Authenticated with identity:', identity.getPrincipal().toText());
   
-        const agent = new HttpAgent({ identity });
+        const agent = new HttpAgent({ identity,verifyQuerySignatures: false });
         console.log('Agent created:', agent);
         if('fetchRootKey' in agent) {
           console.log('fetchRootKey exists in agent');
@@ -131,8 +131,14 @@ const NFTMinter = () => {
   const mintNFT = async () => {
     if (!actor) return;
     try {
-      const tokenId = await actor.mint_nft(nftContent);
+      // Get the current user's principal
+      const identity = await authClient.getIdentity();
+      const userPrincipal = identity.getPrincipal();
+  
+      // Call the mint function with both required parameters
+      const tokenId = await actor.mint_nft(userPrincipal, nftContent);
       setMintedTokenId(tokenId);
+      console.log('NFT minted with token ID:', tokenId);
       alert(`NFT minted with token ID: ${tokenId}`);
     } catch (error) {
       console.error('Error minting NFT:', error);
@@ -156,6 +162,26 @@ const NFTMinter = () => {
     }
   };
 
+  const check_nft = async () => {
+    if (!actor) return;
+    try {
+      const token_id = prompt('Enter token ID:');
+      if (!token_id) return;
+      const bigIntTokenId = BigInt(token_id);
+      console.log('Checking NFT with token ID:', bigIntTokenId);
+      const nft = await actor.get_token_content(bigIntTokenId);
+      console.log('Received NFT data:', nft);
+      if (nft && nft.length > 0) {
+        alert(`NFT found with content: ${nft[0]}`);
+      } else {
+        alert('NFT not found.');
+      }
+    } catch (error) {
+      console.error('Error checking NFT:', error);
+      alert(`Error checking NFT: ${error.message}`);
+    }
+  };
+
   return (
     <div>
       <h2>NFT Minter</h2>
@@ -172,6 +198,7 @@ const NFTMinter = () => {
           {mintedTokenId && (
             <button onClick={transferNFT}>Transfer NFT</button>
           )}
+          <button onClick={check_nft}>Check NFT</button>
         </div>
       )}
       <button onClick={async () => {
