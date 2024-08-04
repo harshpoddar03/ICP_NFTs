@@ -6,6 +6,7 @@ use candid::Principal;
 use candid::CandidType;
 use serde::Deserialize;
 use candid;
+use std::collections::HashSet;
 
 #[derive(CandidType, Deserialize)]
 struct NFT {
@@ -19,15 +20,20 @@ thread_local! {
 
 struct NFTContract {
     tokens: HashMap<u64, NFT>,
+    authorized_minters: HashSet<Principal>,
     next_token_id: u64,
 }
 
 impl NFTContract {
     fn new() -> Self {
-        NFTContract {
+        let mut contract = NFTContract {
             tokens: HashMap::new(),
+            authorized_minters: HashSet::new(),
             next_token_id: 0,
-        }
+        };
+
+        contract.authorized_minters.insert(ic_cdk::caller()); // added so that the owner ( deployer) is the first authorized minter
+        contract
     }
 
     fn mint(&mut self, owner: Principal, content: String) -> u64 {
@@ -54,6 +60,16 @@ impl NFTContract {
     fn get_content(&self, token_id: u64) -> Option<String> {
         self.tokens.get(&token_id).map(|nft| nft.content.clone())
     }
+
+    fn add_authorized_minter(&mut self, minter: Principal) -> Result<(), String> {
+        if !self.authorized_minters.contains(&ic_cdk::caller()) {
+            return Err("Not authorized to add minters".to_string());
+        }
+        self.authorized_minters.insert(minter);
+        Ok(())
+    }
+
+
 }
 
 #[ic_cdk::query]
@@ -79,6 +95,11 @@ fn transfer_nft(to: Principal, token_id: u64) -> bool {
 #[ic_cdk::update]
 fn burn_nft(token_id: u64) -> bool {
     NFT_CONTRACT.with(|contract| contract.borrow_mut().burn(token_id))
+}
+
+#[ic_cdk::update]
+fn add_authorized_minter(minter: Principal) -> Result<(), String> {
+    NFT_CONTRACT.with(|contract| contract.borrow_mut().add_authorized_minter(minter))
 }
 
 // Candid export

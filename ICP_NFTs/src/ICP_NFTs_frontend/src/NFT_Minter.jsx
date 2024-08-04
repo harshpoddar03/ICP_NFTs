@@ -148,10 +148,11 @@ const NFTMinter = () => {
   const transferNFT = async () => {
     if (!actor || !mintedTokenId) return;
     const recipientPrincipal = prompt('Enter recipient Principal ID:');
+    const tokenIdtotransfer = prompt('Enter token ID:');
     if (!recipientPrincipal) return;
 
     try {
-      const result = await actor.transfer_nft(recipientPrincipal, mintedTokenId);
+      const result = await actor.transfer_nft(recipientPrincipal, tokenIdtotransfer);
       if (result) {
         alert('NFT transferred successfully!');
       } else {
