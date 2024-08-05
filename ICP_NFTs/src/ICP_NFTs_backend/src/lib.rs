@@ -70,6 +70,7 @@ impl NFTContract {
     }
 
 
+
 }
 
 #[ic_cdk::query]

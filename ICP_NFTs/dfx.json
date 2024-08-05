@@ -13,7 +13,7 @@
         "entrypoint": "src/ICP_NFTs_frontend/src/index.html"
       },
       "source": [
-        "src/ICP_NFTs_frontend/dist"
+        "src/ICP_NFTs_frontend/dist","src/ICP_NFTs_frontend/dist/assets"
       ],
       "type": "assets"
     },

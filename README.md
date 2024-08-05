@@ -54,13 +54,7 @@ install the internet identity:
 to generate the internet identity:
 
 ```bash
-  dfx identity new
-```
-
-if running on playground, we have to run the following command:
-
-```bash
-  dfx deploy --playgroung
+  dfx identity new my_identity
 ```
 
 to generate the cannister:
@@ -68,4 +62,26 @@ to generate the cannister:
 ```bash
   dfx canister create --all
 ```
+to list the identity:
 
+```bash
+  dfx identity list
+```
+
+to use the identity:
+
+```bash
+  dfx identity use my_identity
+```
+
+to see canister info:
+  
+  ```bash
+    dfx canister info <canister_id>
+  ```
+
+  to change cannister access:
+
+    ```bash
+      dfx canister update-settings ICP_NFTs_frontend --add-controller $(dfx --identity=your-identity-name identity get-principal)
+    ```

@@ -3,8 +3,27 @@ import { AuthClient } from '@dfinity/auth-client';
 import { Actor, HttpAgent } from '@dfinity/agent';
 // import { Actor } from '@dfinity/agent';
 import { idlFactory } from '../../declarations/ICP_NFTs_backend/ICP_NFTs_backend.did.js';
+import { Principal } from '@dfinity/principal';
 
 
+const days = BigInt(1);
+const hours = BigInt(24);
+const nanoseconds = BigInt(3600000000000);
+
+const defaultOptions = {
+  createOptions: {
+    idleOptions: {
+      disableIdle: true,
+    },
+  },
+  loginOptions: {
+    identityProvider:
+      process.env.DFX_NETWORK === "ic"
+        ? "https://identity.ic0.app/#authorize"
+        : `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943/#authorize`,
+    maxTimeToLive: days * hours * nanoseconds,
+  },
+};
 
 const NFTMinter = () => {
   const [authClient , setAuthClient] = useState(null);
@@ -12,22 +31,30 @@ const NFTMinter = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [nftContent, setNftContent] = useState('');
   const [mintedTokenId, setMintedTokenId] = useState(null);
+  // const [authState, setAuthState] = useState('idle'); // Add this state
 
-  // const [tempauthClient, setTempAuthClient] = useState(null);
 
 
   console.log('Inside NFTMinter');
 
+
+
+
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const client = await AuthClient.create();
+        const client = await AuthClient.create(defaultOptions.createOptions);
         setAuthClient(client);
         console.log('AuthClient created:', client);
 
-        if (await client.isAuthenticated()) {
-          handleAuthenticated(client);
+        const isAuthed = await client.isAuthenticated();
+        console.log('Is authenticated:', isAuthed);
+
+        if (isAuthed) {
+          console.log('User is already authenticated, handling authentication...');
+          await handleAuthenticated(client);
         }
+
       } catch (error) {
         console.error('Error creating AuthClient:', error);
       }
@@ -36,26 +63,24 @@ const NFTMinter = () => {
     initAuth();
   }, []);
 
-  const handleAuthReturn = async () => {
-    console.log('Handling auth return...');
-    const isAuth = await authClient.isAuthenticated();
-    console.log(`Authentication status: ${isAuth}`);
-
-    if (isAuth) {
-      console.log('User is authenticated, calling handleAuthenticated...');
-      await handleAuthenticated(authClient);
-    } else {
-      console.log('User is not authenticated after return');
-    }
-
-    // Clear the hash to avoid handling auth return multiple times
-    window.location.hash = '';
-  };
-
-  // Use an effect to check for auth return
   useEffect(() => {
-    if (window.location.hash === '#auth-return' && authClient) {
+    const handleAuthReturn = async () => {
+      console.log('Handling auth return...');
+      if (authClient) {
+        const isAuthed = await authClient.isAuthenticated();
+        console.log('Is authenticated after return:', isAuthed);
+        if (isAuthed) {
+          await handleAuthenticated(authClient);
+        } else {
+          console.log('Authentication failed or was cancelled');
+          setAuthError('Authentication failed or was cancelled');
+        }
+      }
+    };
+
+    if (window.location.hash === '#auth-return') {
       handleAuthReturn();
+      window.history.replaceState(null, null, window.location.pathname);
     }
   }, [authClient]);
 
@@ -63,7 +88,13 @@ const NFTMinter = () => {
       console.log('inside handleAuthenticated');
       try {
         const identity = await client.getIdentity();
-        console.log('Authenticated with identity:', identity.getPrincipal().toText());
+        console.log('Identity received:', identity);
+        
+        if (identity.getPrincipal().isAnonymous()) {
+          console.log('Warning: Anonymous principal detected');
+          // You might want to trigger a re-login here
+          return;
+        }
   
         const agent = new HttpAgent({ identity,verifyQuerySignatures: false });
         console.log('Agent created:', agent);
@@ -98,24 +129,18 @@ const NFTMinter = () => {
       return;
     }
 
-    const identityProviderUrl = process.env.DFX_NETWORK === "ic"
-      ? "https://identity.ic0.app/#authorize"
-      : `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}#authorize`;
-
-    console.log('identityProviderUrl:', identityProviderUrl);
-
-    // Specify the URL to return to after authentication
-    const redirectUrl = new URL(window.location.href);
-    redirectUrl.hash = 'auth-return';
-
     try {
-      console.log('Initiating login process...');
       await authClient.login({
-        identityProvider: identityProviderUrl,
-        maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000), // 7 days
-        redirectUrl: redirectUrl.toString(),
+        ...defaultOptions.loginOptions,
+        onSuccess: () => {
+          console.log('Login successful');
+          handleAuthenticated(authClient);
+        },
+        onError: (error) => {
+          console.error('Login error:', error);
+          setAuthError('Login failed. Please try again.');
+        },
       });
-      
       // The page will redirect, so the code below won't execute immediately
       console.log('Redirect should have happened');
       handleAuthenticated(authClient);
@@ -125,8 +150,6 @@ const NFTMinter = () => {
   };
 
 
-  // const isNowAuthenticated = authClient.isAuthenticated();
-  // console.log(`Is now authenticated: ${isNowAuthenticated}`);
 
   const mintNFT = async () => {
     if (!actor) return;
@@ -134,6 +157,7 @@ const NFTMinter = () => {
       // Get the current user's principal
       const identity = await authClient.getIdentity();
       const userPrincipal = identity.getPrincipal();
+
   
       // Call the mint function with both required parameters
       const tokenId = await actor.mint_nft(userPrincipal, nftContent);
