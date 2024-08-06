@@ -1,8 +1,17 @@
+type HttpHeader = record { value : text; name : text };
+type HttpResponse = record {
+  status : nat;
+  body : blob;
+  headers : vec HttpHeader;
+};
 type Result = variant { Ok; Err : text };
+type TransformArgs = record { context : blob; response : HttpResponse };
 service : {
   add_authorized_minter : (principal) -> (Result);
   burn_nft : (nat64) -> (bool);
   get_token_content : (nat64) -> (opt text) query;
   mint_nft : (principal, text) -> (nat64, text);
+  send_http_request : (text, text, opt text) -> (text);
   transfer_nft : (principal, nat64) -> (bool);
+  transform : (TransformArgs) -> (HttpResponse) query;
 }
