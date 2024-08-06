@@ -85,3 +85,15 @@ to see canister info:
     ```bash
       dfx canister update-settings ICP_NFTs_frontend --add-controller $(dfx --identity=your-identity-name identity get-principal)
     ```
+
+
+    for generating did ( temp solution )
+
+    ```bash
+    cargo test --package ICP_NFTs_backend -- tests::generate_candid --exact --nocapture
+    ```
+
+
+
+    if the assetStorage.did is not added manuually add
+    

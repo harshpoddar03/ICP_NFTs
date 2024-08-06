@@ -33,6 +33,8 @@ const NFTMinter = () => {
   const [mintedTokenId, setMintedTokenId] = useState(null);
   // const [authState, setAuthState] = useState('idle'); // Add this state
 
+  const [principal, setPrincipal] = useState(null);
+
 
 
   console.log('Inside NFTMinter');
@@ -89,6 +91,10 @@ const NFTMinter = () => {
       try {
         const identity = await client.getIdentity();
         console.log('Identity received:', identity);
+
+        console.log("Principal",identity.getPrincipal())
+
+        setPrincipal(identity.getPrincipal());
         
         if (identity.getPrincipal().isAnonymous()) {
           console.log('Warning: Anonymous principal detected');
@@ -149,6 +155,27 @@ const NFTMinter = () => {
     }
   };
 
+  const logout = async () => {
+    if (!authClient) {
+      console.error('AuthClient not initialized');
+      return;
+    }
+
+    try {
+
+      await authClient.logout();
+
+      setIsAuthenticated(false);
+
+      console.log('Logout successful');
+
+    } catch (error) {
+
+      console.error('Error during logout:', error);
+
+    }
+
+  };
 
 
   const mintNFT = async () => {
@@ -170,13 +197,16 @@ const NFTMinter = () => {
   };
 
   const transferNFT = async () => {
-    if (!actor || !mintedTokenId) return;
+    if (!actor) return;
     const recipientPrincipal = prompt('Enter recipient Principal ID:');
+    const recipientPrincipalfin = Principal.fromText(recipientPrincipal);
+    console.log('Recipient Principal:', recipientPrincipalfin);
     const tokenIdtotransfer = prompt('Enter token ID:');
+    const tokentotransfer = BigInt(tokenIdtotransfer);
     if (!recipientPrincipal) return;
 
     try {
-      const result = await actor.transfer_nft(recipientPrincipal, tokenIdtotransfer);
+      const result = await actor.transfer_nft(recipientPrincipalfin, tokentotransfer);
       if (result) {
         alert('NFT transferred successfully!');
       } else {
@@ -190,6 +220,7 @@ const NFTMinter = () => {
   const check_nft = async () => {
     if (!actor) return;
     try {
+      // const principal = prompt('Enter principal ID:');
       const token_id = prompt('Enter token ID:');
       if (!token_id) return;
       const bigIntTokenId = BigInt(token_id);
@@ -220,10 +251,21 @@ const NFTMinter = () => {
             placeholder="Enter text for your NFT"
           />
           <button onClick={mintNFT}>Mint NFT</button>
-          {mintedTokenId && (
-            <button onClick={transferNFT}>Transfer NFT</button>
-          )}
+          <button onClick={transferNFT}>Transfer NFT</button>
+          
           <button onClick={check_nft}>Check NFT</button>
+          <button onClick={async () => { 
+            if (principal) {
+              const principalString = principal.toText();
+              console.log(`Principal ID: ${principalString}`);
+              alert(`Principal ID: ${principalString}`);
+            } else {
+              console.log('Principal not available');
+              alert('Principal not available');
+            }
+          }}>Get Principal ID</button>
+
+          <button onClick={logout}>Logout</button>
         </div>
       )}
       <button onClick={async () => {

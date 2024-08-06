@@ -2,6 +2,7 @@ use ic_cdk::export_candid;
 use ic_cdk::print;
 use std::collections::HashMap;
 use std::cell::RefCell;
+use std::net::ToSocketAddrs;
 use candid::Principal;
 use candid::CandidType;
 use serde::Deserialize;
@@ -20,6 +21,8 @@ thread_local! {
 
 struct NFTContract {
     tokens: HashMap<u64, NFT>,
+    addressToToken: HashMap<Principal, u64>,
+    tokenToAddress: HashMap<u64, Principal>,
     authorized_minters: HashSet<Principal>,
     next_token_id: u64,
 }
@@ -28,6 +31,8 @@ impl NFTContract {
     fn new() -> Self {
         let mut contract = NFTContract {
             tokens: HashMap::new(),
+            addressToToken: HashMap::new(),
+            tokenToAddress: HashMap::new(),
             authorized_minters: HashSet::new(),
             next_token_id: 0,
         };
@@ -38,15 +43,21 @@ impl NFTContract {
 
     fn mint(&mut self, owner: Principal, content: String) -> u64 {
         let token_id = self.next_token_id;
+        self.addressToToken.insert(owner, token_id);
+        self.tokenToAddress.insert(token_id, owner);
         self.tokens.insert(token_id, NFT { owner, content });
         self.next_token_id += 1;
         token_id
     }
 
-    fn transfer(&mut self, from: Principal, to: Principal, token_id: u64) -> bool {
+    fn transfer(&mut self, to: Principal, token_id: u64) -> bool {
+        let from = ic_cdk::caller();
         if let Some(nft) = self.tokens.get_mut(&token_id) {
             if nft.owner == from {
                 nft.owner = to;
+                self.addressToToken.remove(&from);
+                self.addressToToken.insert(to, token_id);
+                self.tokenToAddress.insert(token_id, to);
                 return true;
             }
         }
@@ -58,7 +69,12 @@ impl NFTContract {
     }
 
     fn get_content(&self, token_id: u64) -> Option<String> {
-        self.tokens.get(&token_id).map(|nft| nft.content.clone())
+        let address = ic_cdk::caller();
+        if self.tokenToAddress.get(&token_id) == Some(&address) {
+            return self.tokens.get(&token_id).map(|nft| nft.content.clone());
+        }
+        None
+        // self.tokens.get(&token_id).map(|nft| nft.content.clone())
     }
 
     fn add_authorized_minter(&mut self, minter: Principal) -> Result<(), String> {
@@ -89,8 +105,8 @@ fn mint_nft(owner: Principal, content: String) -> (u64, String) {
 
 #[ic_cdk::update]
 fn transfer_nft(to: Principal, token_id: u64) -> bool {
-    let from = ic_cdk::caller();
-    NFT_CONTRACT.with(|contract| contract.borrow_mut().transfer(from, to, token_id))
+    // let from = ic_cdk::caller();
+    NFT_CONTRACT.with(|contract| contract.borrow_mut().transfer(to, token_id))
 }
 
 #[ic_cdk::update]
