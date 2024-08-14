@@ -10,9 +10,12 @@ use candid;
 use std::collections::HashSet;
 
 #[derive(CandidType, Deserialize)]
-struct NFT {
+#[derive(Clone)]
+pub struct NFT {
     owner: Principal,
-    content: String,
+    model: String,
+    embeddings: Vec<Vec<f32>>,
+    pdfcontent: Vec<HashMap<String, String>>,
 }
 
 thread_local! {
@@ -41,11 +44,11 @@ impl NFTContract {
         contract
     }
 
-    fn mint(&mut self, owner: Principal, content: String) -> u64 {
+    fn mint(&mut self, owner: Principal, model: String, embeddings: Vec<Vec<f32>>, pdfcontent: Vec<HashMap<String, String>>) -> u64 {
         let token_id = self.next_token_id;
         self.addressToToken.insert(owner, token_id);
         self.tokenToAddress.insert(token_id, owner);
-        self.tokens.insert(token_id, NFT { owner, content });
+        self.tokens.insert(token_id, NFT { owner, model, embeddings, pdfcontent });
         self.next_token_id += 1;
         token_id
     }
@@ -68,14 +71,22 @@ impl NFTContract {
         self.tokens.remove(&token_id).is_some()
     }
 
-    fn get_content(&self, token_id: u64) -> Option<String> {
+    // fn get_content(&self, token_id: u64) -> Option<String> {
+    //     let address = ic_cdk::caller();
+    //     if self.tokenToAddress.get(&token_id) == Some(&address) {
+    //         return self.tokens.get(&token_id).map(|nft| nft.content.clone());
+    //     }
+    //     None
+    //     // self.tokens.get(&token_id).map(|nft| nft.content.clone())
+    // }
+    fn get_content(&self, token_id: u64) -> Option<NFT> {
         let address = ic_cdk::caller();
         if self.tokenToAddress.get(&token_id) == Some(&address) {
-            return self.tokens.get(&token_id).map(|nft| nft.content.clone());
+            return self.tokens.get(&token_id).cloned();
         }
         None
-        // self.tokens.get(&token_id).map(|nft| nft.content.clone())
     }
+
 
     fn add_authorized_minter(&mut self, minter: Principal) -> Result<(), String> {
         if !self.authorized_minters.contains(&ic_cdk::caller()) {
@@ -89,20 +100,34 @@ impl NFTContract {
 
 }
 
+// #[ic_cdk::query]
+// pub fn get_token_content(token_id: u64) -> Option<String> {
+//     println!("Attempting to get content for token ID: {}", token_id);
+//     let result = NFT_CONTRACT.with(|contract| contract.borrow().get_content(token_id));
+//     println!("Result: {:?}", result);
+//     result
+// }
 #[ic_cdk::query]
-pub fn get_token_content(token_id: u64) -> Option<String> {
+pub fn get_token_content(token_id: u64) -> Option<NFT> {
     println!("Attempting to get content for token ID: {}", token_id);
     let result = NFT_CONTRACT.with(|contract| contract.borrow().get_content(token_id));
-    println!("Result: {:?}", result);
+    println!("Result: {:?}", result.is_some());
     result
 }
+// #[ic_cdk::update]
+// pub fn mint_nft(owner: Principal, content: String) -> (u64, String) {
+//     let token_id = NFT_CONTRACT.with(|contract| contract.borrow_mut().mint(owner, content.clone()));
+//     println!("Minted NFT with ID: {} and content: {}", token_id, content);
+//     (token_id, content)
+// }
 #[ic_cdk::update]
-pub fn mint_nft(owner: Principal, content: String) -> (u64, String) {
-    let token_id = NFT_CONTRACT.with(|contract| contract.borrow_mut().mint(owner, content.clone()));
-    println!("Minted NFT with ID: {} and content: {}", token_id, content);
-    (token_id, content)
+pub fn mint_nft(owner: Principal, model: String, embeddings: Vec<Vec<f32>>, pdfcontent: Vec<HashMap<String, String>>) -> u64 {
+    let token_id = NFT_CONTRACT.with(|contract| 
+        contract.borrow_mut().mint(owner, model.clone(), embeddings.clone(), pdfcontent.clone())
+    );
+    println!("Minted NFT with ID: {} and model: {}", token_id, model);
+    token_id
 }
-
 #[ic_cdk::update]
 pub fn transfer_nft(to: Principal, token_id: u64) -> bool {
     // let from = ic_cdk::caller();

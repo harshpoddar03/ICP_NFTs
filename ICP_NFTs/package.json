@@ -8,6 +8,7 @@
     "build": "dfx generate && cd src/ICP_NFTs_frontend && npm run build",
     "start": "npm start --workspaces --if-present",
     "test": "npm test --workspaces --if-present"
+
   },
   "type": "module",
   "workspaces": [

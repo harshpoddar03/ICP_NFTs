@@ -4,12 +4,12 @@ use ic_cdk::api::management_canister::http_request::{
     http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse,
     TransformContext, TransformFunc,
 };
+use std::collections::HashMap;
 use ic_cdk::api::management_canister::http_request::TransformArgs;
-
+use crate::nft::NFT;
 use ic_cdk::export_candid;
 use ic_cdk::print;
 use candid::Principal;
-
 // Re-export functions from both modules
 // pub use https::*;
 

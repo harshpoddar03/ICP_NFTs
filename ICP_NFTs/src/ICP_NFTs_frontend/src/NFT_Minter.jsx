@@ -4,6 +4,7 @@ import { Actor, HttpAgent } from '@dfinity/agent';
 // import { Actor } from '@dfinity/agent';
 import { idlFactory } from '../../declarations/ICP_NFTs_backend/ICP_NFTs_backend.did.js';
 import { Principal } from '@dfinity/principal';
+import { useNavigate } from 'react-router-dom';
 
 
 const days = BigInt(1);
@@ -26,20 +27,27 @@ const defaultOptions = {
 };
 
 const NFTMinter = () => {
+  const navigate = useNavigate();
   const [authClient , setAuthClient] = useState(null);
   const [actor, setActor] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [nftContent, setNftContent] = useState('');
   const [mintedTokenId, setMintedTokenId] = useState(null);
   // const [authState, setAuthState] = useState('idle'); // Add this state
+  const [vmaddress,setVmaddress] = useState(null);
 
   const [principal, setPrincipal] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
+
+  const [createnft,setCreateNFT] = useState(null);
 
 
 
   console.log('Inside NFTMinter');
 
-
+  const handleCreate = () => {
+    navigate('/create_nft');
+  };
 
 
   useEffect(() => {
@@ -86,6 +94,17 @@ const NFTMinter = () => {
     }
   }, [authClient]);
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setPdfFile(file);
+      console.log('PDF file selected:', file.name);
+    } else {
+      alert('Please select a PDF file');
+      setPdfFile(null);
+    }
+  };
+
   const handleAuthenticated = async (client) => {
       console.log('inside handleAuthenticated');
       try {
@@ -127,6 +146,39 @@ const NFTMinter = () => {
       }
   }
 
+  const uploadPdf = async () => {
+    if (!pdfFile || !actor) {
+      console.error('No PDF file selected or actor not initialized');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', pdfFile);
+
+      // Assuming your backend API is hosted at a specific URL
+      const response = await fetch('https://380f-106-193-216-5.ngrok-free.app/make_embedding', {
+        method: 'POST',
+        body: formData,
+      });
+      console.log()
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Upload successful:', result);
+      alert('PDF uploaded and processed successfully!');
+
+      // You can do something with the embeddings here if needed
+      // For example, storing them in state or using them for further processing
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      alert('Error uploading PDF');
+    }
+  };
+
 
   const login = async () => {
     console.log('inside login');
@@ -160,22 +212,42 @@ const NFTMinter = () => {
       console.error('AuthClient not initialized');
       return;
     }
-
     try {
-
       await authClient.logout();
-
       setIsAuthenticated(false);
-
       console.log('Logout successful');
 
     } catch (error) {
-
       console.error('Error during logout:', error);
-
     }
-
   };
+
+  const getvm = async () => {
+    if(!actor) return;  
+  try {
+      const vm = await actor.send_http_request("", "GET", "");
+      console.log('VM address:', vm);
+      setVmaddress(vm);
+      alert(`VM address: ${vm}`);
+  }
+  catch (error) {
+    console.error('Error getting VM address:', error);
+  }
+
+};
+
+const handleTrade = () => {
+  // Implement trade functionality or navigation
+  navigate('/trade');
+
+};
+
+const handleChat = () => {
+  // Implement chat functionality or navigation
+  navigate('/chat');
+};
+
+
 
 
   const mintNFT = async () => {
@@ -245,16 +317,12 @@ const NFTMinter = () => {
         <button onClick={login}>Login with Internet Identity</button>
       ) : (
         <div>
-          <textarea
+          {/* <textarea
             value={nftContent}
             onChange={(e) => setNftContent(e.target.value)}
             placeholder="Enter text for your NFT"
-          />
-          <button onClick={mintNFT}>Mint NFT</button>
-          <button onClick={transferNFT}>Transfer NFT</button>
-          
-          <button onClick={check_nft}>Check NFT</button>
-          <button onClick={async () => { 
+          /> */}
+          {/* <button onClick={async () => { 
             if (principal) {
               const principalString = principal.toText();
               console.log(`Principal ID: ${principalString}`);
@@ -263,9 +331,20 @@ const NFTMinter = () => {
               console.log('Principal not available');
               alert('Principal not available');
             }
-          }}>Get Principal ID</button>
-
+          }}>Get Principal ID</button> */}
+          <button onClick={handleCreate}>Create NFT</button>
+          <button onClick={handleTrade}>Trade NFT</button>
+          <button onClick={handleChat}>Chat</button>
           <button onClick={logout}>Logout</button>
+
+          <input 
+            type="file" 
+            accept=".pdf" 
+            onChange={handleFileChange} 
+          />
+          <button onClick={uploadPdf} disabled={!pdfFile}>
+            Upload and Process PDF
+          </button>
         </div>
       )}
       <button onClick={async () => {

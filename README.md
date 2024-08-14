@@ -93,7 +93,13 @@ to see canister info:
     cargo test --package ICP_NFTs_backend -- tests::generate_candid --exact --nocapture
     ```
 
-
-
     if the assetStorage.did is not added manuually add
     
+    error[E0463]: can't find crate for `core`
+  |
+  = note: the `wasm32-unknown-unknown` target may not be installed
+  = help: consider downloading the target with `rustup target add wasm32-unknown-unknown`
+
+  ```bash
+  rustup target add wasm32-unknown-unknown
+  ```
