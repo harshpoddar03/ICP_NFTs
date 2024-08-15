@@ -24,17 +24,29 @@ thread_local! {
 
 struct NFTContract {
     tokens: HashMap<u64, NFT>,
-    addressToToken: HashMap<Principal, u64>,
+    // addressToToken: HashMap<Principal, u64>,
+    addressToTokens: HashMap<Principal, Vec<u64>>,  // Changed to store multiple tokens
     tokenToAddress: HashMap<u64, Principal>,
     authorized_minters: HashSet<Principal>,
     next_token_id: u64,
+}
+
+fn receive_from_js(data: Vec<String>) -> Vec<HashMap<String, String>> {
+    data.chunks(2)
+        .map(|chunk| {
+            let mut map = HashMap::new();
+            map.insert("id".to_string(), chunk[0].clone());
+            map.insert("text".to_string(), chunk[1].clone());
+            map
+        })
+        .collect()
 }
 
 impl NFTContract {
     fn new() -> Self {
         let mut contract = NFTContract {
             tokens: HashMap::new(),
-            addressToToken: HashMap::new(),
+            addressToTokens: HashMap::new(),  // Changed name
             tokenToAddress: HashMap::new(),
             authorized_minters: HashSet::new(),
             next_token_id: 0,
@@ -44,22 +56,40 @@ impl NFTContract {
         contract
     }
 
-    fn mint(&mut self, owner: Principal, model: String, embeddings: Vec<Vec<f32>>, pdfcontent: Vec<HashMap<String, String>>) -> u64 {
+    fn mint(&mut self, owner: Principal, model: String, embeddings: Vec<Vec<f32>>, json: Vec<String>) -> u64 {
         let token_id = self.next_token_id;
-        self.addressToToken.insert(owner, token_id);
+        self.addressToTokens.entry(owner).or_insert_with(Vec::new).push(token_id);
         self.tokenToAddress.insert(token_id, owner);
+        let pdfcontent = receive_from_js(json);
         self.tokens.insert(token_id, NFT { owner, model, embeddings, pdfcontent });
         self.next_token_id += 1;
         token_id
     }
 
+    // fn transfer(&mut self, to: Principal, token_id: u64) -> bool {
+    //     let from = ic_cdk::caller();
+    //     if let Some(nft) = self.tokens.get_mut(&token_id) {
+    //         if nft.owner == from {
+    //             nft.owner = to;
+    //             self.addressToToken.remove(&from);
+    //             self.addressToToken.insert(to, token_id);
+    //             self.tokenToAddress.insert(token_id, to);
+    //             return true;
+    //         }
+    //     }
+    //     false
+    // }
     fn transfer(&mut self, to: Principal, token_id: u64) -> bool {
         let from = ic_cdk::caller();
         if let Some(nft) = self.tokens.get_mut(&token_id) {
             if nft.owner == from {
                 nft.owner = to;
-                self.addressToToken.remove(&from);
-                self.addressToToken.insert(to, token_id);
+                // Remove token from 'from' address
+                if let Some(tokens) = self.addressToTokens.get_mut(&from) {
+                    tokens.retain(|&t| t != token_id);
+                }
+                // Add token to 'to' address
+                self.addressToTokens.entry(to).or_insert_with(Vec::new).push(token_id);
                 self.tokenToAddress.insert(token_id, to);
                 return true;
             }
@@ -67,8 +97,21 @@ impl NFTContract {
         false
     }
 
+    fn all_user_nfts(&self, owner: Principal) -> Vec<u64> {
+        self.addressToTokens.get(&owner).cloned().unwrap_or_default()
+    }
+
+
     fn burn(&mut self, token_id: u64) -> bool {
-        self.tokens.remove(&token_id).is_some()
+        if let Some(nft) = self.tokens.remove(&token_id) {
+            if let Some(tokens) = self.addressToTokens.get_mut(&nft.owner) {
+                tokens.retain(|&t| t != token_id);
+            }
+            self.tokenToAddress.remove(&token_id);
+            true
+        } else {
+            false
+        }
     }
 
     // fn get_content(&self, token_id: u64) -> Option<String> {
@@ -121,9 +164,9 @@ pub fn get_token_content(token_id: u64) -> Option<NFT> {
 //     (token_id, content)
 // }
 #[ic_cdk::update]
-pub fn mint_nft(owner: Principal, model: String, embeddings: Vec<Vec<f32>>, pdfcontent: Vec<HashMap<String, String>>) -> u64 {
+pub fn mint_nft(owner: Principal, model: String, embeddings: Vec<Vec<f32>>, json: Vec<String>) -> u64 {
     let token_id = NFT_CONTRACT.with(|contract| 
-        contract.borrow_mut().mint(owner, model.clone(), embeddings.clone(), pdfcontent.clone())
+        contract.borrow_mut().mint(owner, model.clone(), embeddings.clone(), json.clone())
     );
     println!("Minted NFT with ID: {} and model: {}", token_id, model);
     token_id
@@ -142,6 +185,11 @@ pub fn burn_nft(token_id: u64) -> bool {
 #[ic_cdk::update]
 pub fn add_authorized_minter(minter: Principal) -> Result<(), String> {
     NFT_CONTRACT.with(|contract| contract.borrow_mut().add_authorized_minter(minter))
+}
+
+#[ic_cdk::query]
+pub fn all_user_nfts(owner: Principal) -> Vec<u64> {
+    NFT_CONTRACT.with(|contract| contract.borrow().all_user_nfts(owner))
 }
 
 // Candid export

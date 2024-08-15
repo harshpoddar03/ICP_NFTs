@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useAppContext } from './AppContext';
+
 import { useNavigate } from 'react-router-dom';
 
-const CreateNFT = ({ actor, authClient }) => {
+const CreateNFT = () => {
   const navigate = useNavigate();
   const [nftContent, setNftContent] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
@@ -10,6 +12,8 @@ const CreateNFT = ({ actor, authClient }) => {
   const [pdfContent, setPdfContent] = useState([]);
   const [embeddings, setEmbeddings] = useState([]);
   const [embeddingsGenerated, setEmbeddingsGenerated] = useState(false);
+
+  const {actor, authClient} = useAppContext();
 
   const handleModelChange = (event) => {
     setSelectedModel(event.target.value);
@@ -38,7 +42,7 @@ const CreateNFT = ({ actor, authClient }) => {
       const formData = new FormData();
       formData.append('file', pdfFile);
 
-      const response = await fetch('https://b9b6-106-193-216-5.ngrok-free.app/make_embedding', {
+      const response = await fetch('https://6393-106-193-216-5.ngrok-free.app/make_embedding', {
         method: 'POST',
         body: formData,
       });
@@ -50,8 +54,12 @@ const CreateNFT = ({ actor, authClient }) => {
       const result = await response.json();
 
       setEmbeddings(result.embeddings);
-      setPdfContent(result.document);
+      const flatArray = result.document.flatMap(obj => [obj.id, obj.text]);
+      setPdfContent(flatArray);
       setEmbeddingsGenerated(true);
+
+      console.log('Embeddings generated:', result.embeddings);
+      console.log('PDF content:', typeof result.document[0]);
       
       console.log('Upload successful:', result);
       alert('PDF uploaded and processed successfully!');
@@ -61,6 +69,12 @@ const CreateNFT = ({ actor, authClient }) => {
       alert('Error uploading PDF');
     }
   };
+  // const convertDocuments = (documents) => {
+  //   return documents.map(doc => {
+  //     // Convert each document object to an array of [key, value] pairs
+  //     return Object.entries(doc).map(([key, value]) => [key, value.toString()]);
+  //   });
+  // };
 
   const mintNFT = async () => {
     if (!actor) return;
@@ -68,7 +82,9 @@ const CreateNFT = ({ actor, authClient }) => {
       const identity = await authClient.getIdentity();
       const userPrincipal = identity.getPrincipal();
 
-      const tokenId = await actor.mint_nft(userPrincipal, selectedModel, document, embeddings);
+
+
+      const tokenId = await actor.mint_nft(userPrincipal, selectedModel, embeddings, pdfContent);
         setNftCreate(true);
 
       console.log('NFT minted with token ID:', tokenId);
@@ -103,7 +119,7 @@ const CreateNFT = ({ actor, authClient }) => {
       {/* <button onClick={mintNFT} disabled={!nftContent}>
         Mint NFT
       </button> */}
-      {embeddingsGenerated ? (  <button onClick={mintNFT} disabled={!nftContent}>
+      {embeddingsGenerated ? (  <button onClick={mintNFT}>
         Mint NFT
       </button> ) : null}
 

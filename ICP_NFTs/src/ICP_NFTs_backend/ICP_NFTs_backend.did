@@ -14,14 +14,10 @@ type Result = variant { Ok; Err : text };
 type TransformArgs = record { context : blob; response : HttpResponse };
 service : {
   add_authorized_minter : (principal) -> (Result);
+  all_user_nfts : (principal) -> (vec nat64) query;
   burn_nft : (nat64) -> (bool);
   get_token_content : (nat64) -> (opt NFT) query;
-  mint_nft : (
-      principal,
-      text,
-      vec vec float32,
-      vec vec record { text; text },
-    ) -> (nat64);
+  mint_nft : (principal, text, vec vec float32, vec text) -> (nat64);
   send_http_request : (text, text, text) -> (text);
   transfer_nft : (principal, nat64) -> (bool);
   transform : (TransformArgs) -> (HttpResponse) query;

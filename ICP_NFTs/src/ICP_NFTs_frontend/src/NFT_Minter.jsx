@@ -5,6 +5,7 @@ import { Actor, HttpAgent } from '@dfinity/agent';
 import { idlFactory } from '../../declarations/ICP_NFTs_backend/ICP_NFTs_backend.did.js';
 import { Principal } from '@dfinity/principal';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from './AppContext';
 
 
 const days = BigInt(1);
@@ -28,8 +29,8 @@ const defaultOptions = {
 
 const NFTMinter = () => {
   const navigate = useNavigate();
-  const [authClient , setAuthClient] = useState(null);
-  const [actor, setActor] = useState(null);
+  // const [authClient , setAuthClient] = useState(null);
+  // const [actor, setActor] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [nftContent, setNftContent] = useState('');
   const [mintedTokenId, setMintedTokenId] = useState(null);
@@ -40,6 +41,8 @@ const NFTMinter = () => {
   const [pdfFile, setPdfFile] = useState(null);
 
   const [createnft,setCreateNFT] = useState(null);
+
+  const {actor, setActor, authClient, setAuthClient} = useAppContext();
 
 
 
@@ -157,7 +160,7 @@ const NFTMinter = () => {
       formData.append('file', pdfFile);
 
       // Assuming your backend API is hosted at a specific URL
-      const response = await fetch('https://380f-106-193-216-5.ngrok-free.app/make_embedding', {
+      const response = await fetch('https://5b06-106-193-216-5.ngrok-free.app/make_embedding', {
         method: 'POST',
         body: formData,
       });
