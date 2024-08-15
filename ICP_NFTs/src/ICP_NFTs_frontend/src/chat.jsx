@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from './AppContext';
+import './styles/chat.css';
+
 
 const Chat = () => {
   const { actor, authClient } = useAppContext();
@@ -12,7 +14,7 @@ const Chat = () => {
   const [documents, setDocuments] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [result, setResult] = useState(null);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchUserNfts();
@@ -57,6 +59,13 @@ const Chat = () => {
   const sendMessage = async () => {
     if (!selectedNftId || !userInput.trim()) return;
 
+    const newUserMessage = {
+      type: 'user',
+      content: userInput
+    };
+    setChatHistory(prevHistory => [...prevHistory, newUserMessage]);
+    setIsLoading(true);
+
     try {
       // Prepare the data to send to the API
       console.log(embeddings);
@@ -68,7 +77,7 @@ const Chat = () => {
       };
 
       // Send API request
-      const response = await fetch('https://6393-106-193-216-5.ngrok-free.app/chat', {
+      const response = await fetch('https://3a9f-106-193-168-129.ngrok-free.app/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,22 +95,44 @@ const Chat = () => {
         query: userInput,
         answer: responseData.answer || 'No answer provided'
       });
-      setUserInput('');
+      const newBotMessage = {
+        type: 'bot',
+        content: responseData.answer || 'No answer provided'
+      };
+      // const newMessage = {
+      //   type: 'user',
+      //   content: userInput
+      // };
+      // const newResponse = {
+      //   type: 'bot',
+      //   content: responseData.answer || 'No answer provided'
+      // };
+      // setChatHistory(prevHistory => [...prevHistory, newMessage, newResponse]);
+      setChatHistory(prevHistory => [...prevHistory, newBotMessage]);
     } catch (error) {
         console.error('Error sending message:', error);
-        setResult({
-          query: userInput,
-          answer: `An error occurred: ${error.message}`
-        });
+        const errorMessage = {
+          type: 'bot',
+          content: `An error occurred: ${error.message}`
+        };
+        setChatHistory(prevHistory => [...prevHistory, errorMessage]);
+    } finally{
+      setIsLoading(false);
+      setUserInput('');
+
     }
   };
 
   return (
-    <div>
-      <h2>Chat with Your NFT</h2>
-      <div>
+    <div className="chat-container">
+      <h2 className="chat-header">Chat with Your NFT</h2>
+      <div className="nft-select-container">
         <h3>Select an NFT:</h3>
-        <select onChange={(e) => handleNftSelect(e.target.value)} value={selectedNftId ? bigIntToString(selectedNftId) : ''}>
+        <select 
+          className="nft-select"
+          onChange={(e) => handleNftSelect(e.target.value)} 
+          value={selectedNftId ? bigIntToString(selectedNftId) : ''}
+        >
           <option value="">Select an NFT</option>
           {nftIds.map((nftId, index) => (
             <option key={index} value={bigIntToString(nftId)}>
@@ -110,25 +141,37 @@ const Chat = () => {
           ))}
         </select>
       </div>
-      <div>
-        <h3>Chat:</h3>
+      <div className="chat-messages">
+        {chatHistory.map((message, index) => (
+          <div key={index} className={`message ${message.type}-message`}>
+            <p>{message.content}</p>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="loading-indicator"></div>
+        )}
+      </div>
+      <div className="chat-input-container">
         <input
+          className="chat-input"
           type="text"
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="Type your message..."
         />
-        <button onClick={sendMessage} disabled={!selectedNftId}>Send</button>
+        <button 
+          className="send-button"
+          onClick={sendMessage} 
+          disabled={!selectedNftId || isLoading}
+        >
+          <svg className="send-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
       </div>
-      {result && (
-        <div>
-          <h3>Result:</h3>
-          <p><strong>Query:</strong> {result.query}</p>
-          <p><strong>Answer:</strong> {result.answer}</p>
-        </div>
-      )}
     </div>
   );
-};
+}
 
 export default Chat;

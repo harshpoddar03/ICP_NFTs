@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState , useRef } from 'react';
 import { useAppContext } from './AppContext';
-
+import './styles/create_nfts.css';
 import { useNavigate } from 'react-router-dom';
+import { Paperclip, Upload , X } from 'lucide-react'; // Import icons
 
 const CreateNFT = () => {
   const navigate = useNavigate();
@@ -9,40 +10,47 @@ const CreateNFT = () => {
   const [pdfFile, setPdfFile] = useState(null);
   const [selectedModel, setSelectedModel] = useState('');
   const [nftCreate,setNftCreate] = useState(false);
-  const [pdfContent, setPdfContent] = useState([]);
+  const [pdfFiles, setPdfFiles] = useState([]);
   const [embeddings, setEmbeddings] = useState([]);
   const [embeddingsGenerated, setEmbeddingsGenerated] = useState(false);
+  const [pdfContent, setPdfContent] = useState([]);
 
   const {actor, authClient} = useAppContext();
+  const fileInputRef = useRef(null);
 
   const handleModelChange = (event) => {
     setSelectedModel(event.target.value);
   };
 
 
-
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      setPdfFile(file);
-      console.log('PDF file selected:', file.name);
-    } else {
-      alert('Please select a PDF file');
-      setPdfFile(null);
+    const files = Array.from(event.target.files);
+    const validFiles = files.filter(file => file.type === 'application/pdf');
+    
+    if (validFiles.length !== files.length) {
+      alert('Please select only PDF files');
     }
+
+    setPdfFiles(prevFiles => [...prevFiles, ...validFiles]);
+  };
+
+  const handleRemoveFile = (index) => {
+    setPdfFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   const uploadPdf = async () => {
-    if (!pdfFile || !actor) {
-      console.error('No PDF file selected or actor not initialized');
+    if (pdfFiles.length === 0 || !actor) {
+      console.error('No PDF files selected or actor not initialized');
       return;
     }
 
     try {
       const formData = new FormData();
-      formData.append('file', pdfFile);
+      pdfFiles.forEach((file, index) => {
+        formData.append(`file`, file);
+      });
 
-      const response = await fetch('https://6393-106-193-216-5.ngrok-free.app/make_embedding', {
+      const response = await fetch('https://3a9f-106-193-168-129.ngrok-free.app/make_embedding', {
         method: 'POST',
         body: formData,
       });
@@ -96,34 +104,66 @@ const CreateNFT = () => {
   };
 
   return (
-    <div>
+    <div className="create-nft-container">
       <h2>Create NFT</h2>
-      <select value={selectedModel} onChange={handleModelChange}>
-        <option value="">Select a model</option>
-        <option value="Llama 3.1">Llama 3.1</option>
-        <option value="Llama 70b">Llama 70b</option>
-    </select>
-    {nftCreate ? (
-    <button onClick={() => navigate('/chat')}>Chat</button>
-) : null}
+      <div className="top-buttons">
+        <button className="nav-button" onClick={() => navigate('/')}>Back to Main</button>
+        {embeddingsGenerated && (
+          <button className="mint-button" onClick={mintNFT}>Mint NFT</button>
+        )}
+        {nftCreate && (
+          <button className="chat-button" onClick={() => navigate('/chat')}>Chat</button>
+        )}
+      </div>
+      
+      <div className="content-wrapper">
+        
+          <div className="model-selection">
+            <select value={selectedModel} onChange={handleModelChange}>
+              <option value="">Select a model</option>
+              <option value="Llama 3.1">Llama 3.1</option>
+              <option value="Llama 70b">Llama 70b</option>
+            </select>
+          </div>
 
-      <input 
-        type="file" 
-        accept=".pdf" 
-        onChange={handleFileChange} 
-      />
-      <button onClick={uploadPdf} disabled={!pdfFile}>
-        Upload and Process PDF
-      </button>
+    
 
-      {/* <button onClick={mintNFT} disabled={!nftContent}>
-        Mint NFT
-      </button> */}
-      {embeddingsGenerated ? (  <button onClick={mintNFT}>
-        Mint NFT
-      </button> ) : null}
-
-      <button onClick={() => navigate('/')}>Back to Main</button>
+        <div className="file-upload-area">
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            accept=".pdf" 
+            onChange={handleFileChange} 
+            multiple
+            style={{display: 'none'}}
+          />
+          {pdfFiles.length > 0 ? (
+            <div className="file-list">
+              {pdfFiles.map((file, index) => (
+                <div key={index} className="file-item">
+                  <div className="file-info">
+                    <div className="file-icon"></div>
+                    <span className="file-name">{file.name}</span>
+                  </div>
+                  <button className="close-button" onClick={() => handleRemoveFile(index)}>
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>Drag & drop PDF files here or click the attach button</p>
+          )}
+        </div>
+        <div className="upload-icons">
+            <div className="icon-button attach-button" onClick={() => fileInputRef.current.click()}>
+              <Paperclip size={20} />
+            </div>
+            <div className="icon-button upload-button" onClick={uploadPdf}>
+              <Upload size={20} />
+            </div>
+          </div>
+      </div>
     </div>
   );
 };

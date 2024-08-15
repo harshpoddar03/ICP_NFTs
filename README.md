@@ -103,3 +103,12 @@ to see canister info:
   ```bash
   rustup target add wasm32-unknown-unknown
   ```
+
+
+  for install node_modules
+
+  ```bash
+
+  cd src/ICP_NFTs_frontend
+  npm install --prefix .
+  ```

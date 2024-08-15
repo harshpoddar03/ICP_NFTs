@@ -6,6 +6,9 @@ import { idlFactory } from '../../declarations/ICP_NFTs_backend/ICP_NFTs_backend
 import { Principal } from '@dfinity/principal';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from './AppContext';
+import './styles/NFT_Minter.css';
+import tempImage from './temp.jpg';
+
 
 
 const days = BigInt(1);
@@ -43,7 +46,15 @@ const NFTMinter = () => {
   const [createnft,setCreateNFT] = useState(null);
 
   const {actor, setActor, authClient, setAuthClient} = useAppContext();
-
+  const backgroundStyle = {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundImage: `url(${tempImage})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed', // This keeps the background fixed while scrolling
+};
 
 
   console.log('Inside NFTMinter');
@@ -149,38 +160,38 @@ const NFTMinter = () => {
       }
   }
 
-  const uploadPdf = async () => {
-    if (!pdfFile || !actor) {
-      console.error('No PDF file selected or actor not initialized');
-      return;
-    }
+  // const uploadPdf = async () => {
+  //   if (!pdfFile || !actor) {
+  //     console.error('No PDF file selected or actor not initialized');
+  //     return;
+  //   }
 
-    try {
-      const formData = new FormData();
-      formData.append('file', pdfFile);
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append('file', pdfFile);
 
-      // Assuming your backend API is hosted at a specific URL
-      const response = await fetch('https://5b06-106-193-216-5.ngrok-free.app/make_embedding', {
-        method: 'POST',
-        body: formData,
-      });
-      console.log()
+  //     // Assuming your backend API is hosted at a specific URL
+  //     const response = await fetch('https://5b06-106-193-216-5.ngrok-free.app/make_embedding', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
+  //     console.log()
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
 
-      const result = await response.json();
-      console.log('Upload successful:', result);
-      alert('PDF uploaded and processed successfully!');
+  //     const result = await response.json();
+  //     console.log('Upload successful:', result);
+  //     alert('PDF uploaded and processed successfully!');
 
-      // You can do something with the embeddings here if needed
-      // For example, storing them in state or using them for further processing
-    } catch (error) {
-      console.error('Error uploading PDF:', error);
-      alert('Error uploading PDF');
-    }
-  };
+  //     // You can do something with the embeddings here if needed
+  //     // For example, storing them in state or using them for further processing
+  //   } catch (error) {
+  //     console.error('Error uploading PDF:', error);
+  //     alert('Error uploading PDF');
+  //   }
+  // };
 
 
   const login = async () => {
@@ -225,19 +236,19 @@ const NFTMinter = () => {
     }
   };
 
-  const getvm = async () => {
-    if(!actor) return;  
-  try {
-      const vm = await actor.send_http_request("", "GET", "");
-      console.log('VM address:', vm);
-      setVmaddress(vm);
-      alert(`VM address: ${vm}`);
-  }
-  catch (error) {
-    console.error('Error getting VM address:', error);
-  }
+//   const getvm = async () => {
+//     if(!actor) return;  
+//   try {
+//       const vm = await actor.send_http_request("", "GET", "");
+//       console.log('VM address:', vm);
+//       setVmaddress(vm);
+//       alert(`VM address: ${vm}`);
+//   }
+//   catch (error) {
+//     console.error('Error getting VM address:', error);
+//   }
 
-};
+// };
 
 const handleTrade = () => {
   // Implement trade functionality or navigation
@@ -253,111 +264,106 @@ const handleChat = () => {
 
 
 
-  const mintNFT = async () => {
-    if (!actor) return;
-    try {
-      // Get the current user's principal
-      const identity = await authClient.getIdentity();
-      const userPrincipal = identity.getPrincipal();
+  // const mintNFT = async () => {
+  //   if (!actor) return;
+  //   try {
+  //     // Get the current user's principal
+  //     const identity = await authClient.getIdentity();
+  //     const userPrincipal = identity.getPrincipal();
 
   
-      // Call the mint function with both required parameters
-      const tokenId = await actor.mint_nft(userPrincipal, nftContent);
-      setMintedTokenId(tokenId);
-      console.log('NFT minted with token ID:', tokenId);
-      alert(`NFT minted with token ID: ${tokenId}`);
-    } catch (error) {
-      console.error('Error minting NFT:', error);
-    }
-  };
+  //     // Call the mint function with both required parameters
+  //     const tokenId = await actor.mint_nft(userPrincipal, nftContent);
+  //     setMintedTokenId(tokenId);
+  //     console.log('NFT minted with token ID:', tokenId);
+  //     alert(`NFT minted with token ID: ${tokenId}`);
+  //   } catch (error) {
+  //     console.error('Error minting NFT:', error);
+  //   }
+  // };
 
-  const transferNFT = async () => {
-    if (!actor) return;
-    const recipientPrincipal = prompt('Enter recipient Principal ID:');
-    const recipientPrincipalfin = Principal.fromText(recipientPrincipal);
-    console.log('Recipient Principal:', recipientPrincipalfin);
-    const tokenIdtotransfer = prompt('Enter token ID:');
-    const tokentotransfer = BigInt(tokenIdtotransfer);
-    if (!recipientPrincipal) return;
+  // const transferNFT = async () => {
+  //   if (!actor) return;
+  //   const recipientPrincipal = prompt('Enter recipient Principal ID:');
+  //   const recipientPrincipalfin = Principal.fromText(recipientPrincipal);
+  //   console.log('Recipient Principal:', recipientPrincipalfin);
+  //   const tokenIdtotransfer = prompt('Enter token ID:');
+  //   const tokentotransfer = BigInt(tokenIdtotransfer);
+  //   if (!recipientPrincipal) return;
 
-    try {
-      const result = await actor.transfer_nft(recipientPrincipalfin, tokentotransfer);
-      if (result) {
-        alert('NFT transferred successfully!');
-      } else {
-        alert('NFT transfer failed.');
-      }
-    } catch (error) {
-      console.error('Error transferring NFT:', error);
-    }
-  };
+  //   try {
+  //     const result = await actor.transfer_nft(recipientPrincipalfin, tokentotransfer);
+  //     if (result) {
+  //       alert('NFT transferred successfully!');
+  //     } else {
+  //       alert('NFT transfer failed.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error transferring NFT:', error);
+  //   }
+  // };
 
-  const check_nft = async () => {
-    if (!actor) return;
-    try {
-      // const principal = prompt('Enter principal ID:');
-      const token_id = prompt('Enter token ID:');
-      if (!token_id) return;
-      const bigIntTokenId = BigInt(token_id);
-      console.log('Checking NFT with token ID:', bigIntTokenId);
-      const nft = await actor.get_token_content(bigIntTokenId);
-      console.log('Received NFT data:', nft);
-      if (nft && nft.length > 0) {
-        alert(`NFT found with content: ${nft[0]}`);
-      } else {
-        alert('NFT not found.');
-      }
-    } catch (error) {
-      console.error('Error checking NFT:', error);
-      alert(`Error checking NFT: ${error.message}`);
-    }
-  };
+  // const check_nft = async () => {
+  //   if (!actor) return;
+  //   try {
+  //     // const principal = prompt('Enter principal ID:');
+  //     const token_id = prompt('Enter token ID:');
+  //     if (!token_id) return;
+  //     const bigIntTokenId = BigInt(token_id);
+  //     console.log('Checking NFT with token ID:', bigIntTokenId);
+  //     const nft = await actor.get_token_content(bigIntTokenId);
+  //     console.log('Received NFT data:', nft);
+  //     if (nft && nft.length > 0) {
+  //       alert(`NFT found with content: ${nft[0]}`);
+  //     } else {
+  //       alert('NFT not found.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error checking NFT:', error);
+  //     alert(`Error checking NFT: ${error.message}`);
+  //   }
+  // };
 
   return (
-    <div>
-      <h2>NFT Minter</h2>
-      {!isAuthenticated ? (
-        <button onClick={login}>Login with Internet Identity</button>
-      ) : (
-        <div>
-          {/* <textarea
-            value={nftContent}
-            onChange={(e) => setNftContent(e.target.value)}
-            placeholder="Enter text for your NFT"
-          /> */}
-          {/* <button onClick={async () => { 
-            if (principal) {
-              const principalString = principal.toText();
-              console.log(`Principal ID: ${principalString}`);
-              alert(`Principal ID: ${principalString}`);
-            } else {
-              console.log('Principal not available');
-              alert('Principal not available');
-            }
-          }}>Get Principal ID</button> */}
-          <button onClick={handleCreate}>Create NFT</button>
-          <button onClick={handleTrade}>Trade NFT</button>
-          <button onClick={handleChat}>Chat</button>
-          <button onClick={logout}>Logout</button>
-
-          <input 
-            type="file" 
-            accept=".pdf" 
-            onChange={handleFileChange} 
-          />
-          <button onClick={uploadPdf} disabled={!pdfFile}>
-            Upload and Process PDF
-          </button>
+    <div style={backgroundStyle} >
+      <div className="top-bar">
+        <div className="logo">NFT Minter</div>
+        <div className="button-container">
+          {isAuthenticated ? (
+            <>
+              <button className="button" onClick={handleCreate}>Create NFT</button>
+              <button className="button" onClick={handleTrade}>Trade NFT</button>
+              <button className="button" onClick={handleChat}>Chat</button>
+              <button className="button" onClick={logout}>Logout</button>
+            </>
+          ) : (
+            <button className="button login-button" onClick={login}>Login with Internet Identity</button>
+          )}
         </div>
-      )}
-      <button onClick={async () => {
-      if (authClient) {
-        const isAuth = await authClient.isAuthenticated();
-        console.log(`Current authentication status: ${isAuth}`);
-      } else {
-        console.log('AuthClient not initialized');
-      }
-    }}>Check Auth Status</button>
+      </div>
+      <div className="main-content">
+        <h2>Welcome to NFT Minter</h2>
+        {/* {isAuthenticated && (
+          <div>
+            <input 
+              type="file" 
+              accept=".pdf" 
+              onChange={handleFileChange} 
+            />
+            <button className="button" onClick={uploadPdf} disabled={!pdfFile}>
+              Upload and Process PDF
+            </button>
+          </div>
+        )} */}
+        <button className="button" onClick={async () => {
+          if (authClient) {
+            const isAuth = await authClient.isAuthenticated();
+            console.log(`Current authentication status: ${isAuth}`);
+          } else {
+            console.log('AuthClient not initialized');
+          }
+        }}>Check Auth Status</button>
+      </div>
     </div>
   );
 };
