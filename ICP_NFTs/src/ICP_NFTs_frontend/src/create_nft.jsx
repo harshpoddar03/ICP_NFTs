@@ -1,28 +1,39 @@
-import React, { useState , useRef } from 'react';
-import { useAppContext } from './AppContext';
-import './styles/create_nfts.css';
+// CreateNFT.js
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Paperclip, Upload , X } from 'lucide-react'; // Import icons
+import { Paperclip, Upload, X, Image } from 'lucide-react';
+import { useAppContext } from './AppContext';
+import './styles/CreateNFT.css';
 
 const CreateNFT = () => {
   const navigate = useNavigate();
-  const [nftContent, setNftContent] = useState('');
-  const [pdfFile, setPdfFile] = useState(null);
-  const [selectedModel, setSelectedModel] = useState('');
-  const [nftCreate,setNftCreate] = useState(false);
-  const [pdfFiles, setPdfFiles] = useState([]);
-  const [embeddings, setEmbeddings] = useState([]);
-  const [embeddingsGenerated, setEmbeddingsGenerated] = useState(false);
-  const [pdfContent, setPdfContent] = useState([]);
   const [name, setName] = useState('');
-
-  const {actor, authClient} = useAppContext();
+  const [description, setDescription] = useState('');
+  const [selectedModel, setSelectedModel] = useState('');
+  const [nftImagePreview, setNftImagePreview] = useState(null);
+  const [nftImage, setNftImage] = useState(null);
+  const [pdfFiles, setPdfFiles] = useState([]);
+  const { actor, authClient } = useAppContext();
   const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
 
-  const handleModelChange = (event) => {
-    setSelectedModel(event.target.value);
+  const handleNameChange = (event) => setName(event.target.value);
+  const handleDescriptionChange = (event) => setDescription(event.target.value);
+  const handleModelChange = (event) => setSelectedModel(event.target.value);
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setNftImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNftImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert('Please select an image file');
+    }
   };
-
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -39,9 +50,9 @@ const CreateNFT = () => {
     setPdfFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
-  const uploadPdf = async () => {
-    if (pdfFiles.length === 0 || !actor || !selectedModel || !name) {
-      console.error('Missing required information');
+  const uploadNFT = async () => {
+    if (!nftImage || pdfFiles.length === 0 || !name || !description || !selectedModel || !actor) {
+      alert('Please fill in all fields and upload required files');
       return;
     }
 
@@ -52,16 +63,19 @@ const CreateNFT = () => {
       const identity = await authClient.getIdentity();
       const userPrincipal = identity.getPrincipal();
 
+      const nftImageArray = Array.from(new Uint8Array(await nftImage.arrayBuffer()));
+
       const input = {
         pdf_contents: pdfContentArrays,
-        selected_model: selectedModel,
         name: name,
-        owner_principal: userPrincipal
+        description: description,
+        selected_model: selectedModel,
+        owner_principal: userPrincipal,
+        nft_image: nftImageArray
       };
 
       const tokenId = await actor.process_pdfs_and_mint_nft(input);
 
-      setNftCreate(true);
       console.log('NFT minted with token ID:', tokenId);
       alert(`NFT minted with token ID: ${tokenId}`);
     } catch (error) {
@@ -69,104 +83,120 @@ const CreateNFT = () => {
       alert('Error processing PDFs and minting NFT');
     }
   };
-  const handleNameChange = (event) => {
-    setName(event.target.value);
-  };
-  // const convertDocuments = (documents) => {
-  //   return documents.map(doc => {
-  //     // Convert each document object to an array of [key, value] pairs
-  //     return Object.entries(doc).map(([key, value]) => [key, value.toString()]);
-  //   });
-  // };
-
-  const mintNFT = async () => {
-    if (!actor) return;
-    try {
-      const identity = await authClient.getIdentity();
-      const userPrincipal = identity.getPrincipal();
-
-
-
-      const tokenId = await actor.mint_nft(userPrincipal, selectedModel, embeddings, pdfContent);
-        setNftCreate(true);
-
-      console.log('NFT minted with token ID:', tokenId);
-      alert(`NFT minted with token ID: ${tokenId}`);
-    //   navigate('/'); // Navigate back to the main page after minting
-    } catch (error) {
-      console.error('Error minting NFT:', error);
-    }
-  };
 
   return (
     <div className="create-nft-container">
-      <h2>Create NFT</h2>
-      <div className="top-buttons">
-        <button className="nav-button" onClick={() => navigate('/')}>Back to Main</button>
-        {embeddingsGenerated && (
-          <button className="mint-button" onClick={mintNFT}>Mint NFT</button>
-        )}
-        {nftCreate && (
-          <button className="chat-button" onClick={() => navigate('/chat')}>Chat</button>
-        )}
-      </div>
-      
-      <div className="content-wrapper">
-        
-          <div className="model-selection">
-            <select value={selectedModel} onChange={handleModelChange}>
-              <option value="">Select a model</option>
-              <option value="Llama 3.1">Llama 3.1</option>
-              <option value="Llama 70b">Llama 70b</option>
-            </select>
-          </div>
+      <button 
+        className="back-button"
+        onClick={() => navigate('/')}
+      >
+        Back to Main
+      </button>
 
-          
-        <input
-          type="text"
-          value={name}
-          onChange={handleNameChange}
-          placeholder="Enter NFT name"
-          className="nft-name-input"
-        />
-
-    
-
-        <div className="file-upload-area">
-          <input 
-            type="file" 
-            ref={fileInputRef}
-            accept=".pdf" 
-            onChange={handleFileChange} 
-            multiple
-            style={{display: 'none'}}
-          />
-          {pdfFiles.length > 0 ? (
-            <div className="file-list">
-              {pdfFiles.map((file, index) => (
-                <div key={index} className="file-item">
-                  <div className="file-info">
-                    <div className="file-icon"></div>
-                    <span className="file-name">{file.name}</span>
-                  </div>
-                  <button className="close-button" onClick={() => handleRemoveFile(index)}>
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
+      <div className="create-nft-form">
+        <div className="form-group">
+          <label>NFT Image</label>
+          <div className="nft-image-preview">
+            <div className="nft-image-circle">
+              {nftImagePreview ? (
+                <img src={nftImagePreview} alt="NFT Preview" />
+              ) : (
+                <Image size={40} />
+              )}
             </div>
-          ) : (
-            <p>Drag & drop PDF files here or click the attach button</p>
-          )}
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleImageChange}
+              ref={imageInputRef}
+              className="hidden-input"
+            />
+            <button 
+              onClick={() => imageInputRef.current.click()}
+              className="change-photo-button"
+            >
+              {nftImage ? 'Change Photo' : 'Select Photo'}
+            </button>
+          </div>
         </div>
-        <div className="upload-icons">
-            <div className="icon-button attach-button" onClick={() => fileInputRef.current.click()}>
-              <Paperclip size={20} />
-            </div>
-            <div className="icon-button upload-button" onClick={uploadPdf}>
-              <Upload size={20} />
-            </div>
+
+        <div className="form-group">
+          <label>Name of NFT</label>
+          <input 
+            type="text" 
+            value={name} 
+            onChange={handleNameChange}
+            className="text-input"
+            placeholder="Enter NFT name"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Description</label>
+          <textarea 
+            value={description} 
+            onChange={handleDescriptionChange}
+            className="text-input"
+            placeholder="Enter NFT description"
+            rows="3"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Select Model</label>
+          <select 
+            value={selectedModel} 
+            onChange={handleModelChange}
+            className="select-input"
+          >
+            <option value="">Select a model</option>
+            <option value="Llama 3.1">Llama 3.1</option>
+            <option value="Llama 70b">Llama 70b</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Upload PDF files</label>
+          <div className="pdf-upload-area">
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              accept=".pdf" 
+              onChange={handleFileChange} 
+              multiple
+              className="hidden-input"
+            />
+            {pdfFiles.length > 0 ? (
+              <div className="pdf-file-list">
+                {pdfFiles.map((file, index) => (
+                  <div key={index} className="pdf-file-item">
+                    <div className="pdf-icon">PDF</div>
+                    <span className="pdf-name">{file.name}</span>
+                    <button onClick={() => handleRemoveFile(index)} className="remove-file-button">
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>Drag & drop PDF files here or click the attach button</p>
+            )}
           </div>
+          <div className="button-group">
+            <button 
+              onClick={() => fileInputRef.current.click()}
+              className="attach-button"
+            >
+              <Paperclip size={20} /> Attach
+            </button>
+            <button 
+              onClick={uploadNFT}
+              className="upload-button"
+            >
+              <Upload size={20} /> Upload
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
