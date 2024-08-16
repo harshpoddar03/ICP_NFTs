@@ -110,45 +110,45 @@ fn parse_flask_response(response: Vec<u8>) -> Result<ChatResponse, String> {
     Ok(ChatResponse { jwt_token, url })
 }
 
-#[ic_cdk::query]
-fn transform(raw: TransformArgs) -> HttpResponse {
-    let headers = vec![
-        HttpHeader {
-            name: "Content-Security-Policy".to_string(),
-            value: "default-src 'self'".to_string(),
-        },
-        HttpHeader {
-            name: "Referrer-Policy".to_string(),
-            value: "strict-origin".to_string(),
-        },
-        HttpHeader {
-            name: "Permissions-Policy".to_string(),
-            value: "geolocation=(self)".to_string(),
-        },
-        HttpHeader {
-            name: "Strict-Transport-Security".to_string(),
-            value: "max-age=63072000".to_string(),
-        },
-        HttpHeader {
-            name: "X-Frame-Options".to_string(),
-            value: "DENY".to_string(),
-        },
-        HttpHeader {
-            name: "X-Content-Type-Options".to_string(),
-            value: "nosniff".to_string(),
-        },
-    ];
+// #[ic_cdk::query]
+// fn transform(raw: TransformArgs) -> HttpResponse {
+//     let headers = vec![
+//         HttpHeader {
+//             name: "Content-Security-Policy".to_string(),
+//             value: "default-src 'self'".to_string(),
+//         },
+//         HttpHeader {
+//             name: "Referrer-Policy".to_string(),
+//             value: "strict-origin".to_string(),
+//         },
+//         HttpHeader {
+//             name: "Permissions-Policy".to_string(),
+//             value: "geolocation=(self)".to_string(),
+//         },
+//         HttpHeader {
+//             name: "Strict-Transport-Security".to_string(),
+//             value: "max-age=63072000".to_string(),
+//         },
+//         HttpHeader {
+//             name: "X-Frame-Options".to_string(),
+//             value: "DENY".to_string(),
+//         },
+//         HttpHeader {
+//             name: "X-Content-Type-Options".to_string(),
+//             value: "nosniff".to_string(),
+//         },
+//     ];
 
-    let mut res = HttpResponse {
-        status: raw.response.status.clone(),
-        body: raw.response.body.clone(),
-        headers,
-    };
+//     let mut res = HttpResponse {
+//         status: raw.response.status.clone(),
+//         body: raw.response.body.clone(),
+//         headers,
+//     };
 
-    if res.status == 200u64 {
-        res.body = raw.response.body;
-    } else {
-        ic_cdk::api::print(format!("Received an error from coinbase: err = {:?}", raw));
-    }
-    res
-}
+//     if res.status == 200u64 {
+//         res.body = raw.response.body;
+//     } else {
+//         ic_cdk::api::print(format!("Received an error from coinbase: err = {:?}", raw));
+//     }
+//     res
+// }

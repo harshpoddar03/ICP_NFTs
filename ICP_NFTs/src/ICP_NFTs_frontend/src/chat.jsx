@@ -15,7 +15,7 @@ const Chat = () => {
   const [userInput, setUserInput] = useState('');
   // const [result, setResult] = useState(null);
   const [jwtToken, setJwtToken] = useState(null);
-  const [url, setUrl] = useState(null);
+  const [ChatUrl, setChatUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -45,10 +45,27 @@ const Chat = () => {
 
   const handleNftSelect = async (nftId) => {
     setSelectedNftId(nftId);
-    
     setJwtToken(null);
     setChatUrl(null);
     setChatHistory([]);
+
+    try {
+      const response = await actor.chat(BigInt(nftId));
+      console.log(response)
+      if ('Ok' in response) {
+        const { jwt_token, url } = response.Ok;
+        setJwtToken(jwt_token);
+        setChatUrl(url);
+        console.log("JWT Token:", jwt_token);
+        console.log("Chat URL:", url);
+      } else {
+        // Handle the case where the response is not as expected
+        console.error("Unexpected response format:", response);
+        // You might want to show an error message to the user here
+      }
+    } catch (error) {
+      console.error('Error initiating chat:', error);
+    }
   };
 
   const sendMessage = async () => {
@@ -63,21 +80,15 @@ const Chat = () => {
 
     try {
       // Prepare the data to send to the API
-      console.log(embeddings);
-      console.log(documents);
-      const requestData = {
-        query: userInput,
-        embeddings: embeddings,
-        document: documents
-      };
 
       // Send API request
       const response = await fetch('https://1320-115-117-107-100.ngrok-free.app/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': jwtToken
         },
-        body: JSON.stringify(requestData),
+        body: JSON.stringify({ query: userInput,url: ChatUrl  }),
       });
 
       if (!response.ok) {
@@ -86,10 +97,10 @@ const Chat = () => {
 
       // Update chat history
       const responseData = await response.json();
-      setResult({
-        query: userInput,
-        answer: responseData.answer || 'No answer provided'
-      });
+      // setResult({
+      //   query: userInput,
+      //   answer: responseData.answer || 'No answer provided'
+      // });
       const newBotMessage = {
         type: 'bot',
         content: responseData.answer || 'No answer provided'

@@ -1,9 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import {Route, Routes } from 'react-router-dom';
 import NFTMinter from './NFT_Minter';
 import CreateNFT from './create_nft';
 import Chat from './chat';
 import { AppProvider } from './AppContext';
+import { HashRouter as Router } from 'react-router-dom';
 
 function App() {
   console.log('Inside App.jsx');
