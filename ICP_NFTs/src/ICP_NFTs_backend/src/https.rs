@@ -143,7 +143,8 @@ pub async fn process_pdfs_and_mint_nft(input: ProcessPdfInput) -> Result<u64, St
                 input.owner_principal,
                 input.selected_model,
                 embeddings,
-                json_content
+                json_content,
+                input.name,
             );
 
             Ok(token_id)

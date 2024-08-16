@@ -4,11 +4,13 @@ use ic_cdk::api::management_canister::http_request::{
     http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse,
     TransformContext, TransformFunc,
 };
+mod https_chat;
 use std::collections::HashMap;
 use ic_cdk::api::management_canister::http_request::TransformArgs;
 use crate::nft::NFT;
 use ic_cdk::export_candid;
 use crate::https::PdfUploadResult;
+use crate::https_chat::ChatResponse;
 use crate::https::ProcessPdfInput;
 use ic_cdk::print;
 // crate::https::PdfUploadResult;

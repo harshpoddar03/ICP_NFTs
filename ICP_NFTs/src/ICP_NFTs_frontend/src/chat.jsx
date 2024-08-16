@@ -7,13 +7,15 @@ const Chat = () => {
   const { actor, authClient } = useAppContext();
   const [nftIds, setNftIds] = useState([]);
   const [selectedNftId, setSelectedNftId] = useState(null);
-  const [selectedNftContent, setSelectedNftContent] = useState(null);
+  // const [selectedNftContent, setSelectedNftContent] = useState(null);
   const [chatHistory, setChatHistory] = useState([]);
 //   const [userInput, setUserInput] = useState('');
-  const [embeddings, setEmbeddings] = useState([[]]);
-  const [documents, setDocuments] = useState([]);
+  // const [embeddings, setEmbeddings] = useState([[]]);
+  // const [documents, setDocuments] = useState([]);
   const [userInput, setUserInput] = useState('');
-  const [result, setResult] = useState(null);
+  // const [result, setResult] = useState(null);
+  const [jwtToken, setJwtToken] = useState(null);
+  const [url, setUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -42,18 +44,11 @@ const Chat = () => {
   };
 
   const handleNftSelect = async (nftId) => {
-    try {
-      const nftContent = await actor.get_token_content(BigInt(nftId));
-      setSelectedNftId(nftId);
-      const nftContentmain = nftContent[0];
-      setDocuments(nftContentmain.pdfcontent);
-      setEmbeddings (nftContentmain.embeddings);
-
-      console.log("NFT content:", nftContent);
-
-    } catch (error) {
-      console.error('Error fetching NFT content:', error);
-    }
+    setSelectedNftId(nftId);
+    
+    setJwtToken(null);
+    setChatUrl(null);
+    setChatHistory([]);
   };
 
   const sendMessage = async () => {
