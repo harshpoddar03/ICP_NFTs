@@ -14,6 +14,7 @@ const CreateNFT = () => {
   const [embeddings, setEmbeddings] = useState([]);
   const [embeddingsGenerated, setEmbeddingsGenerated] = useState(false);
   const [pdfContent, setPdfContent] = useState([]);
+  const [name, setName] = useState('');
 
   const {actor, authClient} = useAppContext();
   const fileInputRef = useRef(null);
@@ -39,43 +40,37 @@ const CreateNFT = () => {
   };
 
   const uploadPdf = async () => {
-    if (pdfFiles.length === 0 || !actor) {
-      console.error('No PDF files selected or actor not initialized');
+    if (pdfFiles.length === 0 || !actor || !selectedModel || !name) {
+      console.error('Missing required information');
       return;
     }
 
     try {
-      const formData = new FormData();
-      pdfFiles.forEach((file, index) => {
-        formData.append(`file`, file);
-      });
+      const pdfContents = await Promise.all(pdfFiles.map(file => file.arrayBuffer()));
+      const pdfContentArrays = pdfContents.map(buffer => Array.from(new Uint8Array(buffer)));
 
-      const response = await fetch('https://3a9f-106-193-168-129.ngrok-free.app/make_embedding', {
-        method: 'POST',
-        body: formData,
-      });
+      const identity = await authClient.getIdentity();
+      const userPrincipal = identity.getPrincipal();
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const input = {
+        pdf_contents: pdfContentArrays,
+        selected_model: selectedModel,
+        name: name,
+        owner_principal: userPrincipal
+      };
 
-      const result = await response.json();
+      const tokenId = await actor.process_pdfs_and_mint_nft(input);
 
-      setEmbeddings(result.embeddings);
-      const flatArray = result.document.flatMap(obj => [obj.id, obj.text]);
-      setPdfContent(flatArray);
-      setEmbeddingsGenerated(true);
-
-      console.log('Embeddings generated:', result.embeddings);
-      console.log('PDF content:', typeof result.document[0]);
-      
-      console.log('Upload successful:', result);
-      alert('PDF uploaded and processed successfully!');
-    //   setNftContent(JSON.stringify(result)); // Store the result as NFT content
+      setNftCreate(true);
+      console.log('NFT minted with token ID:', tokenId);
+      alert(`NFT minted with token ID: ${tokenId}`);
     } catch (error) {
-      console.error('Error uploading PDF:', error);
-      alert('Error uploading PDF');
+      console.error('Error processing PDFs and minting NFT:', error);
+      alert('Error processing PDFs and minting NFT');
     }
+  };
+  const handleNameChange = (event) => {
+    setName(event.target.value);
   };
   // const convertDocuments = (documents) => {
   //   return documents.map(doc => {
@@ -125,6 +120,15 @@ const CreateNFT = () => {
               <option value="Llama 70b">Llama 70b</option>
             </select>
           </div>
+
+          
+        <input
+          type="text"
+          value={name}
+          onChange={handleNameChange}
+          placeholder="Enter NFT name"
+          className="nft-name-input"
+        />
 
     
 

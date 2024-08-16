@@ -3,58 +3,84 @@ use ic_cdk::api::management_canister::http_request::{
     TransformContext, TransformFunc,
 };
 use ic_cdk::api::management_canister::http_request::TransformArgs;
-use candid::Principal;
 use ic_cdk::api::call::CallResult;
+use candid::{CandidType, Deserialize};
+use candid::Principal;
+use serde_json::Value;
 
+use crate::nft::{mint_nft, NFT};
+
+#[derive(CandidType, Deserialize)]
+pub struct PdfUploadResult {
+    message: Option<String>,
+    embeddings: Vec<Vec<f32>>,
+    document: Vec<DocumentContent>,
+}
+
+#[derive(CandidType, Deserialize)]
+struct DocumentContent {
+    id: String,
+    text: String,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct ProcessPdfInput {
+    pdf_contents: Vec<Vec<u8>>,
+    selected_model: String,
+    name: String,
+    owner_principal: Principal,
+}
 
 
 #[ic_cdk::update]
-pub async fn send_http_request(endpoint: String, method: String, body: String) -> String {
-    let host = "7a6d-106-221-222-178.ngrok-free.app"; // Replace with your Flask server's host
-    let url = format!("https://{}/{}", host, endpoint);
+pub async fn process_pdfs_and_mint_nft(input: ProcessPdfInput) -> Result<u64, String> {
+    let host = "1320-115-117-107-100.ngrok-free.app"; // Replace with your Flask server's host
+    let url = format!("https://{}/make_embedding", host);
 
-    // type Timestamp = u64;
-    // let start_timestamp: Timestamp = 1682978460; //May 1, 2023 22:01:00 GMT
-    // let seconds_of_time: u64 = 60; //we start with 60 seconds
-    // let host = "api.pro.coinbase.com";
-    // let url = format!(
-    //     "https://{}/products/ICP-USD/candles?start={}&end={}&granularity={}",
-    //     host,
-    //     start_timestamp.to_string(),
-    //     start_timestamp.to_string(),
-    //     seconds_of_time.to_string()
-    // );
+    let boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
+    let mut body = Vec::new();
 
+    for (index, pdf_content) in input.pdf_contents.iter().enumerate() {
+        body.extend_from_slice(format!("--{}\r\n", boundary).as_bytes());
+        body.extend_from_slice(b"Content-Disposition: form-data; name=\"file\"; filename=\"file.pdf\"\r\n");
+        body.extend_from_slice(b"Content-Type: application/pdf\r\n\r\n");
+        body.extend_from_slice(pdf_content);
+        body.extend_from_slice(b"\r\n");
+    }
+    body.extend_from_slice(format!("--{}--\r\n", boundary).as_bytes());
 
     let request_headers = vec![
         HttpHeader {
             name: "Host".to_string(),
-            value: format!("{host}:443"), // or HTTPS
-            // value: host.to_string(), // Removed port for standard format
+            value: format!("{host}:443"),
         },
         HttpHeader {
             name: "User-Agent".to_string(),
             value: "icp_canister".to_string(),
         },
-        // HttpHeader {
-        //     name: "Content-Type".to_string(),
-        //     value: "application/json".to_string(),
-        // },
+        HttpHeader {
+            name: "Content-Type".to_string(),
+            value: format!("multipart/form-data; boundary={}", boundary),
+        },
     ];
 
-    // let http_method = match method.to_lowercase().as_str() {
-    //     "get" => HttpMethod::GET,
-    //     "post" => HttpMethod::POST,
-    //     // Add other methods as needed
-    //     _ => return "Invalid HTTP method".to_string(),
-    // };
+    // Create multipart form-data
+    // let boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
+    // let mut body = Vec::new();
 
-    print!("Sending request to: {}\n", url);
+    // for (index, pdf_content) in input.pdf_contents.into_iter().enumerate() {
+    //     body.extend_from_slice(format!("--{}\r\n", boundary).as_bytes());
+    //     body.extend_from_slice(format!("Content-Disposition: form-data; name=\"file\"; filename=\"file{}.pdf\"\r\n", index).as_bytes());
+    //     body.extend_from_slice("Content-Type: application/pdf\r\n\r\n".as_bytes());
+    //     body.extend_from_slice(&pdf_content);
+    //     body.extend_from_slice("\r\n".as_bytes());
+    // }
+    // body.extend_from_slice(format!("--{}--\r\n", boundary).as_bytes());
 
     let request = CanisterHttpRequestArgument {
         url: url.to_string(),
-        method: HttpMethod::GET,
-        body: Some(body.into_bytes()),
+        method: HttpMethod::POST,
+        body: Some(body),
         max_response_bytes: None,
         transform: Some(TransformContext {
             function: TransformFunc(candid::Func {
@@ -63,32 +89,70 @@ pub async fn send_http_request(endpoint: String, method: String, body: String) -
             }),
             context: vec![],
         }),
-        // transform: None,
         headers: request_headers,
     };
 
     let cycles = 230_949_972_000;
 
-    // let result: CallResult<(HttpResponse,)> = http_request(request, cycles).await;
-
     match http_request(request, cycles).await {
-        //4. DECODE AND RETURN THE RESPONSE
-
-        //See:https://docs.rs/ic-cdk/latest/ic_cdk/api/management_canister/http_request/struct.HttpResponse.html
         Ok((response,)) => {
-            //Return the body as a string and end the method
-            String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
+            let response_body = String::from_utf8(response.body)
+                .map_err(|e| format!("Failed to parse response body: {}", e))?;
+            
+            // Parse JSON response
+            let json_value: Value = serde_json::from_str(&response_body)
+                .map_err(|e| format!("Failed to parse JSON: {}. Response body: {}", e, response_body))?;
+
+            // Extract embeddings with type annotation
+            let embeddings: Vec<Vec<f32>> = json_value["embeddings"]
+                .as_array()
+                .ok_or("Missing 'embeddings' field")?
+                .iter()
+                .map(|v| {
+                    v.as_array()
+                        .ok_or("Invalid embedding format")?
+                        .iter()
+                        .map(|n| n.as_f64().ok_or("Invalid number in embedding").map(|f| f as f32))
+                        .collect::<Result<Vec<f32>, _>>()
+                })
+                .collect::<Result<Vec<Vec<f32>>, _>>()
+                .map_err(|e| format!("Error parsing embeddings: {}", e))?;
+
+            // Extract document with type annotation
+         // Extract document with type annotation
+         let document: Vec<DocumentContent> = json_value["document"]
+            .as_array()
+            .ok_or("Missing 'document' field")?
+            .iter()
+            .map(|v: &Value| -> Result<DocumentContent, String> {
+                Ok(DocumentContent {
+                    id: v["id"].as_str().ok_or("Missing 'id' field")?.to_string(),
+                    text: v["text"].as_str().ok_or("Missing 'text' field")?.to_string(),
+                })
+            })
+            .collect::<Result<Vec<DocumentContent>, String>>()
+            .map_err(|e| format!("Error parsing document: {}", e))?;
+
+            // Convert document to the format expected by mint_nft
+            let json_content: Vec<String> = document.into_iter()
+                .flat_map(|doc| vec![doc.id, doc.text])
+                .collect();
+
+            // Mint NFT
+            let token_id = mint_nft(
+                input.owner_principal,
+                input.selected_model,
+                embeddings,
+                json_content
+            );
+
+            Ok(token_id)
         }
         Err((r, m)) => {
-            let message =
-                format!("The http_request resulted into error. RejectionCode: {r:?}, Error: {m}");
-
-            //Return the error as a string and end the method
-            message
+            Err(format!("The http_request resulted in error. RejectionCode: {:?}, Error: {}", r, m))
         }
     }
 }
-
 #[ic_cdk::query]
 fn transform(raw: TransformArgs) -> HttpResponse {
     let headers = vec![

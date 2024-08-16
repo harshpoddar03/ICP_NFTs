@@ -8,11 +8,13 @@ use std::collections::HashMap;
 use ic_cdk::api::management_canister::http_request::TransformArgs;
 use crate::nft::NFT;
 use ic_cdk::export_candid;
+use crate::https::PdfUploadResult;
+use crate::https::ProcessPdfInput;
 use ic_cdk::print;
+// crate::https::PdfUploadResult;
 use candid::Principal;
 // Re-export functions from both modules
 // pub use https::*;
-
 pub fn export_candid() -> String {
     candid::export_service!();
     __export_service()

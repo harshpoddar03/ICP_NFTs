@@ -77,7 +77,7 @@ const Chat = () => {
       };
 
       // Send API request
-      const response = await fetch('https://3a9f-106-193-168-129.ngrok-free.app/chat', {
+      const response = await fetch('https://1320-115-117-107-100.ngrok-free.app/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

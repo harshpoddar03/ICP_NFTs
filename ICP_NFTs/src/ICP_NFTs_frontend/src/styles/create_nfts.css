@@ -85,11 +85,11 @@ select {
   color: #555;
 }
 
-.file-info {
+/* .file-info {
   display: flex;
   align-items: center;
   margin-top: 1rem;
-}
+} */
 
 .file-icon {
   width: 40px;
@@ -314,6 +314,7 @@ button:disabled {
   font-size: 1.2rem;
   padding: 0;
   margin-left: 1rem;
+  margin-top: 0px !important;
 }
 
 .top-buttons {
