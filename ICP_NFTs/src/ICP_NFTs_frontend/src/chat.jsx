@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import { useAppContext } from './AppContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { marked } from 'marked'; // Import the marked library
@@ -76,6 +76,8 @@ const Chat = () => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [nftDetails, setNftDetails] = useState(null);
   const [isModelFeaturesOpen, setIsModelFeaturesOpen] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const chatEndRef = useRef(null);
 
   useEffect(() => {
     if (nftId) {
@@ -85,6 +87,11 @@ const Chat = () => {
       navigate('/collections'); // Redirect to collections if no NFT ID is provided
     }
   }, [nftId, actor]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory]);
+
 
   const initializeChat = async (id) => {
     setIsInitializing(true);
@@ -131,14 +138,83 @@ const Chat = () => {
     }
   };
 
+  const simulateTyping = async (message) => {
+    setIsTyping(true);
+    let typedMessage = '';
+    const words = message.split(' ');
+    
+    for (let i = 0; i < words.length; i++) {
+      typedMessage += words[i] + ' ';
+      setChatHistory(prevHistory => {
+        const newHistory = [...prevHistory];
+        newHistory[newHistory.length - 1] = { 
+          type: 'bot', 
+          content: `<div class="bot-response">${typedMessage.trim()}</div>`
+        };
+        return newHistory;
+      });
+      await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 50));
+    }
+    setIsTyping(false);
+  };
+
+
+  // const sendMessage = async () => {
+  //   if (!userInput.trim()) return;
+
+  //   const newUserMessage = { type: 'user', content: userInput };
+  //   setChatHistory(prevHistory => [...prevHistory, newUserMessage]);
+  //   setIsLoading(true);
+
+  //   setUserInput(''); // Clear the input field
+
+  //   try {
+  //     const response = await fetch('https://1889-115-117-107-100.ngrok-free.app/chat', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': jwtToken
+  //       },
+  //       body: JSON.stringify({ query: userInput, url: ChatUrl }),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  //     const responseData = await response.json();
+
+  //     const rawMarkdown = responseData.answer || 'No answer provided';
+  //     console.log("Raw Markdown:", rawMarkdown);
+  //     const sanitizedHtml = DOMPurify.sanitize(marked(rawMarkdown));
+
+      
+  //   const wrappedHtml = `<div class="bot-response">${sanitizedHtml}</div>`;
+
+  //   const newBotMessage = {
+  //     type: 'bot',
+  //     content: wrappedHtml
+  //   };
+  //     setChatHistory(prevHistory => [...prevHistory, newBotMessage]);
+  //   } catch (error) {
+  //     console.error('Error sending message:', error);
+  //     const errorMessage = {
+  //       type: 'bot',
+  //       content: `An error occurred: ${error.message}`
+  //     };
+  //     setChatHistory(prevHistory => [...prevHistory, errorMessage]);
+  //   } finally {
+  //     setIsLoading(false);
+  //     setUserInput('');
+  //   }
+  // };
+
   const sendMessage = async () => {
-    if (!userInput.trim()) return;
+    if (!userInput.trim() || isLoading || isInitializing) return;
 
     const newUserMessage = { type: 'user', content: userInput };
     setChatHistory(prevHistory => [...prevHistory, newUserMessage]);
     setIsLoading(true);
-
-    setUserInput(''); // Clear the input field
+    setUserInput('');
 
     try {
       const response = await fetch('https://1889-115-117-107-100.ngrok-free.app/chat', {
@@ -153,30 +229,20 @@ const Chat = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const responseData = await response.json();
-
       const rawMarkdown = responseData.answer || 'No answer provided';
-      console.log("Raw Markdown:", rawMarkdown);
       const sanitizedHtml = DOMPurify.sanitize(marked(rawMarkdown));
-
       
-    const wrappedHtml = `<div class="bot-response">${sanitizedHtml}</div>`;
+      setChatHistory(prevHistory => [...prevHistory, { type: 'bot', content: '' }]);
+      await simulateTyping(`<div class="bot-response">${sanitizedHtml}</div>`);
 
-    const newBotMessage = {
-      type: 'bot',
-      content: wrappedHtml
-    };
-      setChatHistory(prevHistory => [...prevHistory, newBotMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      const errorMessage = {
-        type: 'bot',
-        content: `An error occurred: ${error.message}`
-      };
-      setChatHistory(prevHistory => [...prevHistory, errorMessage]);
+      const errorMessage = `An error occurred: ${error.message}`;
+      setChatHistory(prevHistory => [...prevHistory, { type: 'bot', content: errorMessage }]);
     } finally {
       setIsLoading(false);
-      setUserInput('');
     }
   };
 
@@ -212,15 +278,27 @@ const Chat = () => {
       
       <h2 className="chat-header">Chat with NFT #{nftId}</h2>
       <div className="chat-messages">
-      {chatHistory.map((message, index) => (
-          <div key={index} className={`message ${message.type}-message`}>
-            {message.type === 'bot' ? (
-              <div dangerouslySetInnerHTML={{ __html: message.content }} />
-            ) : (
-              <p>{message.content}</p>
-            )}
-          </div>
-        ))}
+      <div className="chat-messages">
+          {chatHistory.map((message, index) => (
+            <div key={index} className={`message ${message.type}-message`}>
+              {message.type === 'bot' ? (
+                <div dangerouslySetInnerHTML={{ __html: message.content }} />
+              ) : (
+                <p>{message.content}</p>
+              )}
+            </div>
+          ))}
+          {isTyping && (
+            <div className="message bot-message">
+              <div className="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          )}
+          <div ref={chatEndRef} />
+        </div>
         {isLoading && (
           <div className="loading-indicator"></div>
         )}

@@ -255,3 +255,16 @@
     width: 100%;
   }
 }
+
+.upload-label{
+  font-size: 20px;
+}
+.select-label{
+  font-size: 20px;
+}
+.desc-label{
+  font-size: 20px;
+}
+.name-label{
+  font-size: 20px;
+}

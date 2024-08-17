@@ -137,7 +137,7 @@ const CreateNFT = () => {
         </div>
 
         <div className="form-group">
-          <label>Name of NFT</label>
+          <label className='name-label'>Name of NFT</label>
           <input 
             type="text" 
             value={name} 
@@ -148,7 +148,7 @@ const CreateNFT = () => {
         </div>
 
         <div className="form-group">
-          <label>Description</label>
+          <label className='desc-label'>Description</label>
           <textarea 
             value={description} 
             onChange={handleDescriptionChange}
@@ -159,7 +159,7 @@ const CreateNFT = () => {
         </div>
 
         <div className="form-group">
-          <label>Select Model</label>
+          <label className='select-label'>Select Model</label>
           <select 
             value={selectedModel} 
             onChange={handleModelChange}
@@ -172,7 +172,7 @@ const CreateNFT = () => {
         </div>
 
         <div className="form-group">
-          <label>Upload PDF files</label>
+          <label className="upload-label">Upload Knowledge. Fine Tune Your Model</label>
           <div className="pdf-upload-area">
             <input 
               type="file" 
@@ -195,7 +195,7 @@ const CreateNFT = () => {
                 ))}
               </div>
             ) : (
-              <p>Drag & drop PDF files here or click the attach button</p>
+              <p>Click the attach button</p>
             )}
           </div>
           <div className="button-group">
