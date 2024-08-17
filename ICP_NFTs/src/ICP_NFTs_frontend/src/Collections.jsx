@@ -1,0 +1,254 @@
+import React, { useState, useEffect } from 'react';
+import { useAppContext } from './AppContext';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Card, 
+  CardContent, 
+  CardMedia,
+  Typography, 
+  Grid, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  Button, 
+  Box
+} from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import './styles/Collections.css'; // Import the NFT_Minter styles
+
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      default: '#000000',
+      paper: '#121212',
+    },
+  },
+});
+
+
+const NFTImage = ({ nftImage, name }) => {
+  const [imageError, setImageError] = React.useState(false);
+
+  const uint8ArrayToBase64 = (uint8Array) => {
+    if (!(uint8Array instanceof Uint8Array)) {
+      console.error('Invalid image data: not a Uint8Array for NFT:', name);
+      return '';
+    }
+    
+    try {
+      const binary = String.fromCharCode.apply(null, uint8Array);
+      return window.btoa(binary);
+    } catch (error) {
+      console.error('Error converting Uint8Array to base64 for NFT:', name, error);
+      return '';
+    }
+  };
+
+  const handleImageError = (error) => {
+    console.error('Failed to load image for NFT:', name, error);
+    setImageError(true);
+  };
+
+  const imageSource = React.useMemo(() => {
+    if (!nftImage || nftImage.length === 0) {
+      console.error('Empty or invalid image data for NFT:', name);
+      return '';
+    }
+    
+    try {
+      const base64 = uint8ArrayToBase64(nftImage);
+      console.log(`Image base64 for NFT ${name} (first 100 chars):`, base64.substring(0, 100));
+      
+      if (!base64.startsWith('/9j/') && !base64.startsWith('iVBOR')) {
+        console.warn('Unexpected image data format for NFT:', name);
+      }
+      
+      return `data:image/jpeg;base64,${base64}`;
+    } catch (error) {
+      console.error('Error creating image source for NFT:', name, error);
+      return '';
+    }
+  }, [nftImage, name]);
+
+  if (imageError || !imageSource) {
+    return (
+      <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0' }}>
+        <Typography variant="body2">Image not available for {name || 'Unnamed NFT'}</Typography>
+      </div>
+    );
+  }
+
+  return (
+    <CardMedia
+      component="img"
+      height="200"
+      image={imageSource}
+      alt={name || 'Unnamed NFT'}
+      onError={handleImageError}
+    />
+  );
+};
+
+const NFTCollection = () => {
+  const { actor, authClient } = useAppContext();
+  const [nfts, setNfts] = useState([]);
+  const [selectedNft, setSelectedNft] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [principal, setPrincipal] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchUserNfts();
+    fetchPrincipal()
+  }, [actor, authClient]);
+
+  const fetchUserNfts = async () => {
+    if (!actor || !authClient) return;
+
+    try {
+      const identity = await authClient.getIdentity();
+      const userPrincipal = identity.getPrincipal();
+      const userNftIdsArray = await actor.all_user_nfts(userPrincipal);
+      const userNftIds = Array.from(userNftIdsArray);
+      
+      const nftDetails = await Promise.all(userNftIds.map(async (id) => {
+        const content = await actor.get_token_content(BigInt(id));
+        console.log('Raw NFT Content:', content);
+        if (Array.isArray(content) && content.length > 0) {
+          const nft = content[0];
+          console.log('NFT Image type:', typeof nft.nft_image);
+          console.log('NFT Image length:', nft.nft_image ? nft.nft_image.length : 'N/A');
+          console.log('NFT Name:', nft.name);
+          return { ...nft, id };
+        }
+        return null;
+      }));
+      
+      const validNfts = nftDetails.filter(nft => nft !== null);
+      console.log('Valid NFTs:', validNfts.length);
+      setNfts(validNfts);
+    } catch (error) {
+      console.error('Error fetching user NFTs:', error);
+    }
+  };
+
+  const openNftDetails = (nft) => {
+    console.log('Opening details for NFT:', nft);
+    setSelectedNft(nft);
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedNft(null);
+  };
+
+  const openChat = (nftId) => {
+    navigate(`/chat/${nftId}`);
+  };
+
+
+  const getOwnerText = (owner) => {
+    if (!owner) return 'Unknown';
+    if (typeof owner.toText === 'function') {
+      try {
+        return owner.toText();
+      } catch (error) {
+        console.error('Error calling toText on owner:', error);
+        return 'Error getting owner';
+      }
+    }
+    return 'Invalid owner format';
+  };
+
+  const fetchPrincipal = async () => {
+    if (authClient) {
+      const identity = await authClient.getIdentity();
+      setPrincipal(identity.getPrincipal());
+    }
+  };
+
+
+  const handleCreate = () => navigate('/create_nft');
+  const handleTrade = () => navigate('/trade');
+  const handleCollections = () => navigate('/collections');
+
+  const logout = async () => {
+    if (authClient) {
+      await authClient.logout();
+      navigate('/');
+    }
+  };
+
+
+  return (
+    <div className="nft-collection">
+      <div className="top-bar">
+        <div className="logo">RAG BOT</div>
+        {principal && (
+          <div className="dropdown">
+            <button 
+              className="dropdown-toggle"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              {principal.toString().slice(0, 10)}...
+              <span className="arrow-down"></span>
+            </button>
+            {isDropdownOpen && (
+              <div className="dropdown-menu">
+                <button onClick={handleCollections}>Collections</button>
+                <button onClick={handleCreate}>Create</button>
+                <button onClick={logout}>Logout</button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="collection-content">
+        <h1 className="collection-title">Your NFT Collection</h1>
+        <div className="nft-grid">
+          {nfts.map((nft, index) => (
+            <div key={index} className="nft-card" onClick={() => openNftDetails(nft)}>
+              <NFTImage nftImage={nft.nft_image} name={nft.name || `NFT ${index + 1}`} />
+              <div className="nft-details">
+                <h2 className="nft-name">{nft.name || `NFT ${index + 1}`}</h2>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Dialog open={isDialogOpen} onClose={closeDialog} maxWidth="md" fullWidth backgroundColor="black">
+        <DialogContent>
+          {selectedNft && (
+            <div className="dialog-content">
+              <div className="dialog-image">
+                <NFTImage nftImage={selectedNft.nft_image} name={selectedNft.name || 'Unnamed NFT'} />
+              </div>
+              <div className="dialog-details">
+                <h2>{selectedNft.name || 'Unnamed NFT'}</h2>
+                <p><strong>Description:</strong> {selectedNft.description || 'No description available'}</p>
+                <p><strong>Model:</strong> {selectedNft.model || 'Unknown model'}</p>
+                <p><strong>Owner:</strong> {getOwnerText(selectedNft.owner)}</p>
+              </div>
+              <div className="dialog-actions">
+                <button className="dialog-chat" onClick={() => openChat(selectedNft.id)}>
+                  Chat
+                </button>
+                <button className="dialog-close" onClick={closeDialog}>
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default NFTCollection;

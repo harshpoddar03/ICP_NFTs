@@ -5,7 +5,7 @@ import CreateNFT from './create_nft';
 import Chat from './chat';
 import { AppProvider } from './AppContext';
 import { HashRouter as Router } from 'react-router-dom';
-
+import Collections from './Collections';
 function App() {
   console.log('Inside App.jsx');
   
@@ -16,7 +16,8 @@ function App() {
         <Routes>
           <Route path="/create_nft" element={<CreateNFT />} />
           <Route path="/" element={<NFTMinter />} />
-          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:nftId" element={<Chat />} />
+          <Route path="/collections" element={<Collections />} />
         </Routes>
       </Router>
       </AppProvider>

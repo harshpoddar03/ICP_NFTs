@@ -36,7 +36,7 @@ pub struct ProcessPdfInput {
 
 #[ic_cdk::update]
 pub async fn process_pdfs_and_mint_nft(input: ProcessPdfInput) -> Result<u64, String> {
-    let host = "1320-115-117-107-100.ngrok-free.app"; // Replace with your Flask server's host
+    let host = "669a-115-117-107-100.ngrok-free.app"; // Replace with your Flask server's host
     let url = format!("https://{}/make_embedding", host);
 
     let boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";

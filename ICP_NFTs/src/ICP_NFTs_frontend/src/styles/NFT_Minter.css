@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Bangers&family=Bungee+Shade&family=Cabin+Sketch&family=Cinzel&family=Fredoka+One&family=Lobster&family=Monoton&family=Orbitron&family=Pacifico&family=Permanent+Marker&family=Press+Start+2P&family=Righteous&family=Rubik+Mono+One&display=swap');
 body{
   margin: 0 !important;
 }
@@ -145,3 +146,101 @@ p {
     flex-direction: column;
   }
 }
+.animated-word-container {
+  display: inline-block;
+  vertical-align: bottom;
+  width: 3.5ch; /* Adjust this value based on the longest animated word */
+  margin-right: 50px;
+  height: 1.2em;
+}
+.animated-text {
+  display: inline-block;
+  animation: changeFont 8s infinite;
+}
+
+@keyframes changeFont {
+  0%, 100% {
+    font-family: 'Alfa Slab One', cursive;
+    font-style: normal;
+    background: linear-gradient(to right, #00FFA3, #DC1FFF);
+    /* -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; */
+  }
+  6.25% {
+    font-family: 'Bangers', cursive;
+    font-style: italic;
+    background: linear-gradient(to right, #03E1FF, #DC1FFF);
+  }
+  12.5% {
+    font-family: 'Bungee Shade', cursive;
+    font-style: normal;
+    background: linear-gradient(to right, #DC1FFF, #00FFA3);
+  }
+  18.75% {
+    font-family: 'Cabin Sketch', cursive;
+    font-style: italic;
+    background: linear-gradient(to right, #00FFA3, #03E1FF);
+  }
+  25% {
+    font-family: 'Cinzel', serif;
+    font-style: normal;
+    background: linear-gradient(to right, #03E1FF, #DC1FFF);
+  }
+  31.25% {
+    font-family: 'Fredoka One', cursive;
+    font-style: italic;
+    background: linear-gradient(to right, #DC1FFF, #00FFA3);
+  }
+  37.5% {
+    font-family: 'Lobster', cursive;
+    font-style: normal;
+    background: linear-gradient(to right, #00FFA3, #03E1FF);
+  }
+  43.75% {
+    font-family: 'Monoton', cursive;
+    font-style: italic;
+    background: linear-gradient(to right, #03E1FF, #DC1FFF);
+  }
+  50% {
+    font-family: 'Orbitron', sans-serif;
+    font-style: normal;
+    background: linear-gradient(to right, #DC1FFF, #00FFA3);
+  }
+  56.25% {
+    font-family: 'Pacifico', cursive;
+    font-style: italic;
+    background: linear-gradient(to right, #00FFA3, #03E1FF);
+  }
+  62.5% {
+    font-family: 'Permanent Marker', cursive;
+    font-style: normal;
+    background: linear-gradient(to right, #03E1FF, #DC1FFF);
+  }
+  68.75% {
+    font-family: 'Press Start 2P', cursive;
+    font-style: italic;
+    background: linear-gradient(to right, #DC1FFF, #00FFA3);
+  }
+  75% {
+    font-family: 'Righteous', cursive;
+    font-style: normal;
+    background: linear-gradient(to right, #00FFA3, #03E1FF);
+  }
+  81.25% {
+    font-family: 'Rubik Mono One', sans-serif;
+    font-style: italic;
+    background: linear-gradient(to right, #03E1FF, #DC1FFF);
+  }
+  87.5% {
+    font-family: 'Times New Roman', serif;
+    font-style: normal;
+    background: linear-gradient(to right, #DC1FFF, #00FFA3);
+  }
+  93.75% {
+    font-family: 'Courier New', monospace;
+    font-style: italic;
+    background: linear-gradient(to right, #00FFA3, #03E1FF);
+  }
+}
+
+

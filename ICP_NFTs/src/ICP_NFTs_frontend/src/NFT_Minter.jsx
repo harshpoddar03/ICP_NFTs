@@ -5,7 +5,7 @@ import { idlFactory } from '../../declarations/ICP_NFTs_backend/ICP_NFTs_backend
 import { Principal } from '@dfinity/principal';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from './AppContext';
-import tempImage from './temp2.jpg';
+import tempImage from './temp3.png';
 import './styles/NFT_Minter.css';
 
 const defaultOptions = {
@@ -113,7 +113,7 @@ const NFTMinter = () => {
 
   const handleCreate = () => navigate('/create_nft');
   const handleTrade = () => navigate('/trade');
-  const handleChat = () => navigate('/chat');
+  const handleCollections = () => navigate('/collections');
 
 
   return (
@@ -131,7 +131,7 @@ const NFTMinter = () => {
             </button>
             {isDropdownOpen && (
               <div className="dropdown-menu">
-                <button onClick={handleChat}>Chat</button>
+                <button onClick={handleCollections}>Collections</button>
                 <button onClick={handleCreate}>Create</button>
                 <button onClick={logout}>Logout</button>
               </div>
@@ -140,7 +140,12 @@ const NFTMinter = () => {
         )}
       </div>
       <div className="main-content">
-        <h1>Own your AI. A decentralized Future</h1>
+      <h1>
+          <span className="animated-word-container">
+            <span className="animated-text">Own</span>
+          </span>
+          {" your AI. A decentralized Future"}
+        </h1>
         <p>Revolutionizing AI ownership through decentralized technology</p>
         <div className="button-container">
           {isAuthenticated ? (
