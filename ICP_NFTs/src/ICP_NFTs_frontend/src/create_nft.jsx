@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Paperclip, Upload, X, Image } from 'lucide-react';
 import { useAppContext } from './AppContext';
 import './styles/CreateNFT.css';
+import { Alert, Snackbar } from '@mui/material';
 
 const CreateNFT = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const CreateNFT = () => {
   const { actor, authClient } = useAppContext();
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
+  const [nftCreated, setNftCreated] = useState(false);
 
   const handleNameChange = (event) => setName(event.target.value);
   const handleDescriptionChange = (event) => setDescription(event.target.value);
@@ -75,17 +77,31 @@ const CreateNFT = () => {
       };
 
       const tokenId = await actor.process_pdfs_and_mint_nft(input);
-
+      setNftCreated(true);
       console.log('NFT minted with token ID:', tokenId);
-      alert(`NFT minted with token ID: ${tokenId}`);
+      // alert(`NFT minted with token ID: ${tokenId}`);
     } catch (error) {
       console.error('Error processing PDFs and minting NFT:', error);
       alert('Error processing PDFs and minting NFT');
     }
   };
 
+  const handleCloseAlert = () => {
+    setNftCreated(false);
+  };
+
   return (
     <div className="create-nft-container">
+        <Snackbar 
+        open={!!nftCreated}
+        autoHideDuration={6000} 
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseAlert} severity="success" sx={{ width: '100%' }}>
+          NFT Created Successfully !
+        </Alert>
+      </Snackbar>
       <button 
         className="back-button"
         onClick={() => navigate('/')}

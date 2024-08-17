@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify'; // Import DOMPurify for sanitization
 import './styles/chat.css';
 
 
+
 const NFTImage = ({ nftImage, name }) => {
   const [imageError, setImageError] = React.useState(false);
 
@@ -123,12 +124,21 @@ const Chat = () => {
     }
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault(); // Prevents default behavior (like adding a newline)
+      sendMessage();
+    }
+  };
+
   const sendMessage = async () => {
     if (!userInput.trim()) return;
 
     const newUserMessage = { type: 'user', content: userInput };
     setChatHistory(prevHistory => [...prevHistory, newUserMessage]);
     setIsLoading(true);
+
+    setUserInput(''); // Clear the input field
 
     try {
       const response = await fetch('https://1889-115-117-107-100.ngrok-free.app/chat', {
@@ -225,12 +235,13 @@ const Chat = () => {
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="Type your message..."
+          onKeyDown={handleKeyDown}
           // disabled={isLoading || isInitializing}
         />
         <button 
           className="send-button"
           onClick={sendMessage} 
-          disabled={isLoading}
+          disabled={isLoading || isInitializing}
         >
           <svg className="send-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

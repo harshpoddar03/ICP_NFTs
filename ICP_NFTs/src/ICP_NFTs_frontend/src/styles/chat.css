@@ -68,6 +68,10 @@
   transition: background-color 0.3s ease;
 }
 
+.model-features ul{
+  list-style-type: none;
+}
+
 .model-tag:hover {
   background-color: #3a3a3a;
 }
@@ -100,6 +104,7 @@
 
 .model-features li {
   margin-bottom: 5px;
+  list-style-type: none;
 }
 
 /* .model-name {

@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import './styles/Collections.css'; // Import the NFT_Minter styles
+import { Alert, Snackbar } from '@mui/material';
 // import AddIcon from '@mui/icons-material/Add'; // Import the Add icon
 
 
@@ -99,7 +100,7 @@ const NFTCollection = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [principal, setPrincipal] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [AppleIcon,setApi] = useState("");
+  const [Api,setApi] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -222,9 +223,21 @@ const NFTCollection = () => {
     });
   };
 
-
+  const handleCloseAlert = () => {
+    setApi(null);
+  };
   return (
     <div className="nft-collection">
+        <Snackbar 
+        open={!!Api} 
+        autoHideDuration={6000} 
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseAlert} severity="success" sx={{ width: '100%' }}>
+          API Key generated: {Api}
+        </Alert>
+      </Snackbar>
       <div className="top-bar">
         <div className="logo">RAG BOT</div>
         {principal && (
