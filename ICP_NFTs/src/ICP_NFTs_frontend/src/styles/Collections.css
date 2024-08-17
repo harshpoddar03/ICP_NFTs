@@ -164,6 +164,7 @@ body {
 
 .description {
   margin-bottom: 10px;
+  word-break: break-word;
 }
 
 .tag-container {
@@ -266,14 +267,17 @@ body {
   transition: opacity 0.3s ease;
 }
 
-.dialog-chat:hover {
+.chat.button {
+  background: linear-gradient(90deg, #8A2BE2, #FF69B4) !important;
+}
+
+.api-button {
+  background: linear-gradient(90deg, #00CED1, #20B2AA) !important;
+}
+
+.dialog-button:hover {
   opacity: 0.8;
 }
-
-.chat-button {
-  background: linear-gradient(90deg, #8A2BE2, #FF69B4);
-}
-
 
 .create-nft {
   display: flex;

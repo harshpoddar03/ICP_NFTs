@@ -5,6 +5,64 @@ import { marked } from 'marked'; // Import the marked library
 import DOMPurify from 'dompurify'; // Import DOMPurify for sanitization
 import './styles/chat.css';
 
+
+const NFTImage = ({ nftImage, name }) => {
+  const [imageError, setImageError] = React.useState(false);
+
+  const uint8ArrayToBase64 = (uint8Array) => {
+    if (!(uint8Array instanceof Uint8Array)) {
+      console.error('Invalid image data: not a Uint8Array for NFT:', name);
+      return '';
+    }
+    
+    try {
+      const binary = String.fromCharCode.apply(null, uint8Array);
+      return window.btoa(binary);
+    } catch (error) {
+      console.error('Error converting Uint8Array to base64 for NFT:', name, error);
+      return '';
+    }
+  };
+
+  const handleImageError = (error) => {
+    console.error('Failed to load image for NFT:', name, error);
+    setImageError(true);
+  };
+
+  const imageSource = React.useMemo(() => {
+    if (!nftImage || nftImage.length === 0) {
+      console.error('Empty or invalid image data for NFT:', name);
+      return '';
+    }
+    
+    try {
+      const base64 = uint8ArrayToBase64(nftImage);
+      return `data:image/jpeg;base64,${base64}`;
+    } catch (error) {
+      console.error('Error creating image source for NFT:', name, error);
+      return '';
+    }
+  }, [nftImage, name]);
+
+  if (imageError || !imageSource) {
+    return (
+      <div className="nft-image-placeholder">
+        <p>Image not available for {name || 'Unnamed NFT'}</p>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={imageSource}
+      alt={name || 'Unnamed NFT'}
+      onError={handleImageError}
+      className="nft-image"
+    />
+  );
+};
+
+
 const Chat = () => {
   const { actor, authClient } = useAppContext();
   const { nftId } = useParams(); // Get nftId from URL
@@ -15,10 +73,13 @@ const Chat = () => {
   const [ChatUrl, setChatUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [nftDetails, setNftDetails] = useState(null);
+  const [isModelFeaturesOpen, setIsModelFeaturesOpen] = useState(false);
 
   useEffect(() => {
     if (nftId) {
       initializeChat(nftId);
+      fetchNFTDetails(nftId);
     } else {
       navigate('/collections'); // Redirect to collections if no NFT ID is provided
     }
@@ -44,6 +105,21 @@ const Chat = () => {
     }
     finally{
       setIsInitializing(false);
+    }
+  };
+
+  const toggleModelFeatures = () => {
+    setIsModelFeaturesOpen(!isModelFeaturesOpen);
+  };
+
+  const fetchNFTDetails = async (id) => {
+    try {
+      const content = await actor.get_token_content(BigInt(id));
+      if (Array.isArray(content) && content.length > 0) {
+        setNftDetails(content[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching NFT details:', error);
     }
   };
 
@@ -95,7 +171,35 @@ const Chat = () => {
   };
 
   return (
+  <div className="chat-page">
+    <div className="sidebar">
+    {nftDetails && (
+      <>
+          <div className="nft-image-container">
+              <NFTImage nftImage={nftDetails.nft_image} name={nftDetails.name} />
+            </div>
+        <h2>{nftDetails.name || 'Unnamed NFT'}</h2>
+        <p>{nftDetails.description || 'No description available'}</p>
+        <div className="model-info">
+        <div className="model-tag" onClick={toggleModelFeatures}>
+                <span className="model-name">
+                  Model: {nftDetails.model || 'Unknown'}
+                </span>
+                <span className="arrow-down"></span>
+              </div>
+              {isModelFeaturesOpen && (
+                <ul className="model-features">
+                  <li>Content window: 16k</li>
+                  <li>Feature 2</li>
+                  <li>Feature 3</li>
+                </ul>
+              )}
+            </div>
+      </>
+    )}
+  </div>
     <div className="chat-container">
+      
       <h2 className="chat-header">Chat with NFT #{nftId}</h2>
       <div className="chat-messages">
       {chatHistory.map((message, index) => (
@@ -134,6 +238,7 @@ const Chat = () => {
           </svg>
         </button>
       </div>
+    </div>
     </div>
   );
 }
