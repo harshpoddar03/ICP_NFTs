@@ -1,3 +1,4 @@
+type ApiKeyResponse = record { api_key : text };
 type ChatResponse = record { url : text; jwt_token : text };
 type HttpHeader = record { value : text; name : text };
 type HttpResponse = record {
@@ -24,18 +25,20 @@ type ProcessPdfInput = record {
 };
 type Result = variant { Ok; Err : text };
 type Result_1 = variant { Ok : ChatResponse; Err : text };
-type Result_2 = variant { Ok : nat64; Err : text };
+type Result_2 = variant { Ok : ApiKeyResponse; Err : text };
+type Result_3 = variant { Ok : nat64; Err : text };
 type TransformArgs = record { context : blob; response : HttpResponse };
 service : {
   add_authorized_minter : (principal) -> (Result);
   all_user_nfts : (principal) -> (vec nat64) query;
   burn_nft : (nat64) -> (bool);
   chat : (nat64) -> (Result_1);
+  generate_api_key : (nat64) -> (Result_2);
   get_token_content : (nat64) -> (opt NFT) query;
   mint_nft : (principal, text, vec vec float32, vec text, text, text, blob) -> (
       nat64,
     );
-  process_pdfs_and_mint_nft : (ProcessPdfInput) -> (Result_2);
+  process_pdfs_and_mint_nft : (ProcessPdfInput) -> (Result_3);
   transfer_nft : (principal, nat64) -> (bool);
   transform : (TransformArgs) -> (HttpResponse) query;
   verify_user_with_token : (nat64, principal) -> (bool) query;

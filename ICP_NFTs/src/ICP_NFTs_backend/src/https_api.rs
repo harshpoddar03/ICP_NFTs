@@ -3,20 +3,21 @@ use ic_cdk::api::management_canister::http_request::{
     TransformContext, TransformFunc,
 };
 use ic_cdk::api::management_canister::http_request::TransformArgs;
-use candid::{CandidType, Deserialize, Principal};
+use candid::{CandidType, Deserialize};
 use serde_json::{self, json, Value};
 
 use crate::nft::{verify_user_with_token, get_token_content, NFT};
 
 #[derive(CandidType, Deserialize)]
-
-pub struct ChatResponse {
-    jwt_token: String,
-    url: String,
+pub struct ApiKeyResponse {
+    api_key: String,
 }
 
+const HOST: &str = "1889-115-117-107-100.ngrok-free.app"; // Replace with your actual host
+const MASTER_API_KEY: &str = "1234567890"; // Replace with your actual master API key
+
 #[ic_cdk::update]
-pub async fn chat(token_id: u64) -> Result<ChatResponse, String> {
+pub async fn generate_api_key(token_id: u64) -> Result<ApiKeyResponse, String> {
     let caller = ic_cdk::caller();
     
     // Verify token ownership
@@ -28,34 +29,24 @@ pub async fn chat(token_id: u64) -> Result<ChatResponse, String> {
     let nft_content = get_token_content(token_id)
         .ok_or("Failed to get token content".to_string())?;
 
-    // Prepare chat request for Flask API
-    let chat_request = prepare_chat_request(nft_content)?;
+    // Generate API key
+    let api_key = generate_one_time_api_key(nft_content).await?;
 
-    // Make HTTP request to Flask API
-    let response = make_flask_request(chat_request).await?;
-
-    // Parse response and return JWT token
-    // let jwt_token = parse_flask_response(response)?;
-
-    parse_flask_response(response)
+    Ok(ApiKeyResponse { api_key })
 }
 
-fn prepare_chat_request(nft: NFT) -> Result<Value, String> {
-    Ok(json!({
+async fn generate_one_time_api_key(nft: NFT) -> Result<String, String> {
+    let request_body = json!({
         "model": nft.model,
         "embeddings": nft.embeddings,
         "document": nft.pdfcontent,
-    }))
-}
+    });
 
-async fn make_flask_request(request_body: Value) -> Result<Vec<u8>, String> {
-    let host = "1889-115-117-107-100.ngrok-free.app";
-    let url = format!("https://{}/start_chat", host);
-
+    let url = format!("https://{}/get_temp_api_key", HOST);
     let request_headers = vec![
         HttpHeader {
             name: "Host".to_string(),
-            value: format!("{host}:443"),
+            value: format!("{HOST}:443"),
         },
         HttpHeader {
             name: "User-Agent".to_string(),
@@ -65,10 +56,14 @@ async fn make_flask_request(request_body: Value) -> Result<Vec<u8>, String> {
             name: "Content-Type".to_string(),
             value: "application/json".to_string(),
         },
+        HttpHeader {
+            name: "X-Master-API-Key".to_string(),
+            value: MASTER_API_KEY.to_string(),
+        },
     ];
 
     let request = CanisterHttpRequestArgument {
-        url: url.to_string(),
+        url,
         method: HttpMethod::POST,
         body: Some(serde_json::to_vec(&request_body).map_err(|e| e.to_string())?),
         max_response_bytes: None,
@@ -85,29 +80,20 @@ async fn make_flask_request(request_body: Value) -> Result<Vec<u8>, String> {
     let cycles = 230_949_972_000;
 
     match http_request(request, cycles).await {
-        Ok((response,)) => Ok(response.body),
+        Ok((response,)) => {
+            let response_str = String::from_utf8(response.body)
+                .map_err(|e| format!("Failed to parse response as UTF-8: {}", e))?;
+            let response_json: Value = serde_json::from_str(&response_str)
+                .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+            let api_key = response_json["temp_api_key"]
+                .as_str()
+                .ok_or_else(|| "API key not found in response".to_string())?
+                .to_string();
+            
+            Ok(api_key)
+        },
         Err((r, m)) => Err(format!("HTTP request failed. RejectionCode: {:?}, Error: {}", r, m)),
     }
-}
-
-fn parse_flask_response(response: Vec<u8>) -> Result<ChatResponse, String> {
-    let response_str = String::from_utf8(response)
-        .map_err(|e| format!("Failed to parse response as UTF-8: {}", e))?;
-    
-    let response_json: Value = serde_json::from_str(&response_str)
-        .map_err(|e| format!("Failed to parse JSON: {}", e))?;
-    
-    let jwt_token = response_json["jwt_token"]
-        .as_str()
-        .ok_or_else(|| "JWT token not found in response".to_string())?
-        .to_string();
-    
-    let url = response_json["url"]
-        .as_str()
-        .ok_or_else(|| "URL not found in response".to_string())?
-        .to_string();
-
-    Ok(ChatResponse { jwt_token, url })
 }
 
 // #[ic_cdk::query]
@@ -148,7 +134,7 @@ fn parse_flask_response(response: Vec<u8>) -> Result<ChatResponse, String> {
 //     if res.status == 200u64 {
 //         res.body = raw.response.body;
 //     } else {
-//         ic_cdk::api::print(format!("Received an error from coinbase: err = {:?}", raw));
+//         ic_cdk::api::print(format!("Received an error from the API: err = {:?}", raw));
 //     }
 //     res
 // }

@@ -99,6 +99,7 @@ const NFTCollection = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [principal, setPrincipal] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [AppleIcon,setApi] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -188,6 +189,24 @@ const NFTCollection = () => {
     navigate('/create_nft');
   };
 
+  const handleApiClick = async (id) => {
+    try {
+      const response = await actor.generate_api_key(BigInt(id));
+      if ('Ok' in response) {
+        const { api_key } = response.Ok;
+        console.log("API Key:", api_key);
+        setApi(api_key);
+      } else {
+        console.error("Unexpected response format:", response);
+        // Handle error, maybe show a message to the user
+      }
+    } catch (error) {
+      console.error('Error initiating chat:', error);
+      // Handle error, maybe show a message to the user
+    }
+
+  }
+
   const truncateAddress = (address) => {
     if (typeof address !== 'string') return 'Invalid Address';
     if (address.length <= 13) return address;
@@ -274,7 +293,7 @@ const NFTCollection = () => {
               <button className="dialog-button chat button" onClick={() => openChat(selectedNft.id)}>
                 Chat
               </button>
-              <button className="dialog-button api-button">
+              <button className="dialog-button api-button" onClick={() => handleApiClick(selectedNft.id)}>
                 Get API
               </button>
             </div>
