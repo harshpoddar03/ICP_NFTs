@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from './AppContext';
 import { useParams, useNavigate } from 'react-router-dom';
+import { marked } from 'marked'; // Import the marked library
+import DOMPurify from 'dompurify'; // Import DOMPurify for sanitization
 import './styles/chat.css';
 
 const Chat = () => {
@@ -60,11 +62,16 @@ const Chat = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const responseData = await response.json();
+      
+      const rawMarkdown = responseData.answer || 'No answer provided';
+      console.log("Raw Markdown:", rawMarkdown);
+      const sanitizedHtml = DOMPurify.sanitize(marked(rawMarkdown));
+
+      
       const newBotMessage = {
         type: 'bot',
-        content: responseData.answer || 'No answer provided'
+        content: sanitizedHtml
       };
       setChatHistory(prevHistory => [...prevHistory, newBotMessage]);
     } catch (error) {
@@ -84,9 +91,13 @@ const Chat = () => {
     <div className="chat-container">
       <h2 className="chat-header">Chat with NFT #{nftId}</h2>
       <div className="chat-messages">
-        {chatHistory.map((message, index) => (
+      {chatHistory.map((message, index) => (
           <div key={index} className={`message ${message.type}-message`}>
-            <p>{message.content}</p>
+            {message.type === 'bot' ? (
+              <div dangerouslySetInnerHTML={{ __html: message.content }} />
+            ) : (
+              <p>{message.content}</p>
+            )}
           </div>
         ))}
         {isLoading && (
