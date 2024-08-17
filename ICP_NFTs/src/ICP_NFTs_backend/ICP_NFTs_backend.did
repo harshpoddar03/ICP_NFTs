@@ -9,14 +9,18 @@ type NFT = record {
   model : text;
   owner : principal;
   name : text;
+  description : text;
   pdfcontent : vec vec record { text; text };
   embeddings : vec vec float32;
+  nft_image : blob;
 };
 type ProcessPdfInput = record {
   pdf_contents : vec blob;
   name : text;
   selected_model : text;
+  description : text;
   owner_principal : principal;
+  nft_image : blob;
 };
 type Result = variant { Ok; Err : text };
 type Result_1 = variant { Ok : ChatResponse; Err : text };
@@ -28,7 +32,9 @@ service : {
   burn_nft : (nat64) -> (bool);
   chat : (nat64) -> (Result_1);
   get_token_content : (nat64) -> (opt NFT) query;
-  mint_nft : (principal, text, vec vec float32, vec text, text) -> (nat64);
+  mint_nft : (principal, text, vec vec float32, vec text, text, text, blob) -> (
+      nat64,
+    );
   process_pdfs_and_mint_nft : (ProcessPdfInput) -> (Result_2);
   transfer_nft : (principal, nat64) -> (bool);
   transform : (TransformArgs) -> (HttpResponse) query;

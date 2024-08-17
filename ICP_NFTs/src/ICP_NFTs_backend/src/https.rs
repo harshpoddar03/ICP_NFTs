@@ -28,7 +28,9 @@ pub struct ProcessPdfInput {
     pdf_contents: Vec<Vec<u8>>,
     selected_model: String,
     name: String,
+    description: String,
     owner_principal: Principal,
+    nft_image: Vec<u8>,
 }
 
 
@@ -145,6 +147,8 @@ pub async fn process_pdfs_and_mint_nft(input: ProcessPdfInput) -> Result<u64, St
                 embeddings,
                 json_content,
                 input.name,
+                input.description,
+                input.nft_image,
             );
 
             Ok(token_id)

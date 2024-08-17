@@ -15,8 +15,10 @@ pub struct NFT {
     owner: Principal,
     pub model: String,
     pub name: String,
+    pub description: String,
     pub embeddings: Vec<Vec<f32>>,
     pub pdfcontent: Vec<HashMap<String, String>>,
+    pub nft_image: Vec<u8>,
 }
 
 thread_local! {
@@ -57,16 +59,15 @@ impl NFTContract {
         contract
     }
 
-    fn mint(&mut self, owner: Principal, model: String, embeddings: Vec<Vec<f32>>, json: Vec<String>,name :String) -> u64 {
+    fn mint(&mut self, owner: Principal, model: String, embeddings: Vec<Vec<f32>>, json: Vec<String>, name: String, description: String, nft_image: Vec<u8>) -> u64 {
         let token_id = self.next_token_id;
         self.addressToTokens.entry(owner).or_insert_with(Vec::new).push(token_id);
         self.tokenToAddress.insert(token_id, owner);
         let pdfcontent = receive_from_js(json);
-        self.tokens.insert(token_id, NFT { owner, model, name,embeddings, pdfcontent});
+        self.tokens.insert(token_id, NFT { owner, model, name, description, embeddings, pdfcontent, nft_image });
         self.next_token_id += 1;
         token_id
     }
-
     // fn transfer(&mut self, to: Principal, token_id: u64) -> bool {
     //     let from = ic_cdk::caller();
     //     if let Some(nft) = self.tokens.get_mut(&token_id) {
@@ -174,13 +175,14 @@ pub fn get_token_content(token_id: u64) -> Option<NFT> {
 //     (token_id, content)
 // }
 #[ic_cdk::update]
-pub fn mint_nft(owner: Principal, model: String, embeddings: Vec<Vec<f32>>, json: Vec<String>,name:String) -> u64 {
+pub fn mint_nft(owner: Principal, model: String, embeddings: Vec<Vec<f32>>, json: Vec<String>, name: String, description: String, nft_image: Vec<u8>) -> u64 {
     let token_id = NFT_CONTRACT.with(|contract| 
-        contract.borrow_mut().mint(owner, model.clone(), embeddings.clone(), json.clone(),name.clone())
+        contract.borrow_mut().mint(owner, model.clone(), embeddings.clone(), json.clone(), name.clone(), description.clone(), nft_image.clone())
     );
     println!("Minted NFT with ID: {} and model: {}", token_id, model);
     token_id
 }
+
 #[ic_cdk::update]
 pub fn transfer_nft(to: Principal, token_id: u64) -> bool {
     // let from = ic_cdk::caller();

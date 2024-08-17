@@ -1,144 +1,147 @@
-/* Global styles */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Arial', sans-serif;
-    color: #ffffff;
+body{
+  margin: 0 !important;
+}
+
+.nft-minter {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.arrow-down {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 0.5rem;
+  border-top: 4px solid white;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 100%;
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.dropdown-menu button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  opacity: 0.8;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: opacity 0.3s, background-color 0.3s;
+}
+
+.button.primary {
+  background: linear-gradient(90deg, #8A2BE2, #FF69B4);
+  color: white;
+}
+
+.button.primary:hover {
+  opacity: 0.9;
+}
+
+.button.secondary {
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+}
+
+.button.secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.5rem;
   }
-  
-  /* NFTMinter component styles */
-  .nft-minter-container {
-    min-height: 100vh;
-    display: flex;
+
+  .button-container {
     flex-direction: column;
-    background-image: url('/ICP_NFTs/src/ICP_NFTs_frontend/src/styles/temp.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed; /* This keeps the background fixed while scrolling */
   }
-  
-  /* Top bar styles */
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    background-color: rgba(3, 3, 3, 1);
-    position: relative;
-    z-index: 10;
-  }
-  
-  .top-bar::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 25%;
-    right: 25%;
-    height: 1px;
-    background-color: white;
-  }
-  
-  .logo {
-    display: flex;
-    align-items: center;
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .logo::before {
-    content: '';
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    background: linear-gradient(45deg, #FF8E00, #FF5733);
-    border-radius: 50%;
-    margin-right: 0.5rem;
-  }
-  
-  /* Button styles */
-  .button {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(34, 25, 25, 0.3);
-    padding: 0.5rem 1.5rem;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 1rem;
-    margin-left: 1rem;
-    cursor: pointer;
-    border-radius: 20px;
-    transition: background-color 0.3s, border-color 0.3s;
-  }
-  
-  .button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
-  }
-  
-  /* Main content area */
-  .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2rem;
-    position: relative;
-    z-index: 5;
-  }
-  
-  h2 {
-    font-size: 5rem;
-    margin-bottom: 1rem;
-    color: #ffffff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  }
-  
-  p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    max-width: 600px;
-  }
-  
-  .get-started {
-    background-color: #FFF;
-    color: #000;
-    font-weight: bold;
-    padding: 0.75rem 2rem;
-    border-radius: 25px;
-    text-decoration: none;
-    transition: background-color 0.3s;
-  }
-  
-  .get-started:hover {
-    background-color: #EEE;
-  }
-  
-  /* File input styles */
-  input[type="file"] {
-    margin: 1rem 0;
-  }
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .top-bar {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .button-container {
-      margin-top: 1rem;
-    }
-    
-    .button {
-      margin-left: 0;
-      margin-right: 1rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    h2 {
-      font-size: 3rem;
-    }
-  }
+}

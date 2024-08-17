@@ -10,7 +10,7 @@ function App() {
   console.log('Inside App.jsx');
   
   return (
-    <div className="App">
+    <div className="App" style={{backgroundColor: 'black'}}>
       <AppProvider>
       <Router>
         <Routes>
