@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import './styles/Collections.css'; // Import the NFT_Minter styles
+// import AddIcon from '@mui/icons-material/Add'; // Import the Add icon
 
 
 const theme = createTheme({
@@ -183,6 +184,25 @@ const NFTCollection = () => {
     }
   };
 
+  const handleCreateNFT = () => {
+    navigate('/create_nft');
+  };
+
+  const truncateAddress = (address) => {
+    if (typeof address !== 'string') return 'Invalid Address';
+    if (address.length <= 13) return address;
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      // You can add a notification here to inform the user that the address was copied
+      console.log('Address copied to clipboard');
+    }, (err) => {
+      console.error('Could not copy text: ', err);
+    });
+  };
+
 
   return (
     <div className="nft-collection">
@@ -211,6 +231,13 @@ const NFTCollection = () => {
       <div className="collection-content">
         <h1 className="collection-title">Your NFT Collection</h1>
         <div className="nft-grid">
+
+        <div className="nft-card create-nft" onClick={handleCreateNFT}>
+            <div className="create-nft-content">
+              <span className="plus-sign">+</span>
+              {/* <Typography variant="h6">Create New NFT</Typography> */}
+            </div>
+          </div>
           {nfts.map((nft, index) => (
             <div key={index} className="nft-card" onClick={() => openNftDetails(nft)}>
               <NFTImage nftImage={nft.nft_image} name={nft.name || `NFT ${index + 1}`} />
@@ -221,32 +248,44 @@ const NFTCollection = () => {
           ))}
         </div>
       </div>
-
-      <Dialog open={isDialogOpen} onClose={closeDialog} maxWidth="md" fullWidth backgroundColor="black">
-        <DialogContent>
-          {selectedNft && (
-            <div className="dialog-content">
-              <div className="dialog-image">
-                <NFTImage nftImage={selectedNft.nft_image} name={selectedNft.name || 'Unnamed NFT'} />
+      <Dialog open={isDialogOpen} onClose={closeDialog} maxWidth="false" fullWidth="false">
+    <DialogContent className="dialog-content dialog-box-container-main">
+      {selectedNft && (
+        <>
+          <div className="dialog-image">
+            <NFTImage nftImage={selectedNft.nft_image} name={selectedNft.name || 'Unnamed NFT'} />
+          </div>
+          <div className="dialog-details">
+            <h2>{selectedNft.name || 'Unnamed NFT'}</h2>
+            <p className="description"><strong>Description:</strong> {selectedNft.description || 'No description available'}</p>
+            <div className="tag-container">
+              <div className="tag model-tag" title={selectedNft.model || 'Unknown model'}>
+                Model: {selectedNft.model || 'Unknown model'}
               </div>
-              <div className="dialog-details">
-                <h2>{selectedNft.name || 'Unnamed NFT'}</h2>
-                <p><strong>Description:</strong> {selectedNft.description || 'No description available'}</p>
-                <p><strong>Model:</strong> {selectedNft.model || 'Unknown model'}</p>
-                <p><strong>Owner:</strong> {getOwnerText(selectedNft.owner)}</p>
-              </div>
-              <div className="dialog-actions">
-                <button className="dialog-chat" onClick={() => openChat(selectedNft.id)}>
-                  Chat
-                </button>
-                <button className="dialog-close" onClick={closeDialog}>
-                  ×
-                </button>
+              <div 
+                className="tag owner-tag" 
+                title={getOwnerText(selectedNft.owner)}
+                onClick={() => copyToClipboard(getOwnerText(selectedNft.owner))}
+              >
+                Owner: {truncateAddress(getOwnerText(selectedNft.owner))}
               </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            <div className="button-container-collections">
+              <button className="dialog-button chat button" onClick={() => openChat(selectedNft.id)}>
+                Chat
+              </button>
+              <button className="dialog-button api-button">
+                Get API
+              </button>
+            </div>
+          </div>
+          <button className="dialog-close " onClick={closeDialog}>
+            ×
+          </button>
+        </>
+      )}
+    </DialogContent>
+  </Dialog>
     </div>
   );
 };

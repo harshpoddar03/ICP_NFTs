@@ -124,48 +124,130 @@ body {
   margin-bottom: 0.5rem;
 }
 
-@media (max-width: 768px) {
-  .collection-title {
-    font-size: 2rem;
-  }
 
-  .nft-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-}
+/* 
+.dialog-content {
+  display: flex;
+  padding: 20px;
+} */
+
+/* Dialogs  */
 
 
 .dialog-content {
   display: flex;
   padding: 20px;
-}
-
-.dialog-image {
-  width: 40%;
-  max-width: 300px;
-  margin-right: 20px;
+  position: relative;
+  background-color: #121212;
+  color: white;
+  max-width: 900px; /* Decrease the width of the dialog box */
+  margin: 0 auto;
+  border-radius: 8px;
 }
 
 .dialog-image img {
+  /* width: 100%; */
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  max-width: 70%;
+}
+
+.dialog-image{
+  max-width: 40%;
+}
+
+.dialog-details h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.description {
+  margin-bottom: 10px;
+}
+
+.tag-container {
+  display: flex;
+  /* flex-wrap: wrap; Allow tags to wrap if needed */
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-direction: column;
+}
+.tag {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8em; /* Decrease the font size */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%; /* Ensure tags don't overflow their container */
+  cursor: pointer; /* Indicate clickability for copying */
+}
+
+.model-tag {
+  background-color: #3a3a3a;
+  flex-grow: 1;
+}
+
+.owner-tag {
+  background-color: #2a2a2a;
+  flex-grow: 1;
+}
+
+.button-container-collections {
+  display: flex;
+  gap: 15px;
+  margin-top: auto;
+}
+
+/* .dialog-image img {
   width: 100%;
   height: auto;
   object-fit: cover;
   border-radius: 8px;
-}
+} */
 
 .dialog-details {
   flex: 1;
 }
 
-.dialog-actions {
+
+/* .dialog-actions {
   position: absolute;
   top: 10px;
   right: 10px;
   display: flex;
   gap: 10px;
+} */
+
+.dialog-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.dialog-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  transition: opacity 0.3s;
+  flex: 1;
+}
+
+
+.dialog-button:hover {
+  background-color: #4a4a4a;
 }
 
 .dialog-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -186,4 +268,85 @@ body {
 
 .dialog-chat:hover {
   opacity: 0.8;
+}
+
+.chat-button {
+  background: linear-gradient(90deg, #8A2BE2, #FF69B4);
+}
+
+
+.create-nft {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.create-nft:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.create-nft-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+}
+
+.plus-sign {
+  font-size: 60px;
+  font-weight: 300;
+  margin-bottom: 10px;
+}
+
+/* Ensure the create NFT box has the same height as other NFT cards */
+.nft-card {
+  height: 300px; /* Adjust this value based on your desired card height */
+}
+
+.create-nft .create-nft-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.css-mbdu2s {
+  background-color: black !important;
+}
+
+@media (max-width: 768px) {
+  .collection-title {
+    font-size: 2rem;
+  }
+
+  .nft-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+.css-1ty026z {
+  padding: 40px ;
+}
+
+.dialog-box-container-main {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding: 40px 44px !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  flex-direction: row !important;
+}
+
+/* .dialog-box-main{
+  max-width: 700px !important ;
+} */
+.css-f6vpyr {
+  background-color: transparent !important;
 }
