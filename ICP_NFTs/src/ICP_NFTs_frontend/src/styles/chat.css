@@ -26,6 +26,7 @@
     padding: 10px;
     background-color: black;
     border-top: 1px solid #ccc;
+    position: relative;
   }
   
   .nft-select {
@@ -150,3 +151,18 @@
   .result-container p {
     margin: 5px 0;
   }
+
+  .bot-response{
+    font-size: 16px;
+  }
+
+  .initializing-message {
+    position: absolute;
+    top: -25px;
+    left: 0;
+    width: 100%;
+    color: white;
+    font-style: italic;
+    font-size: 16px;
+  }
+  

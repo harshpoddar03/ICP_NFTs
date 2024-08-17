@@ -14,6 +14,7 @@ const Chat = () => {
   const [jwtToken, setJwtToken] = useState(null);
   const [ChatUrl, setChatUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     if (nftId) {
@@ -24,6 +25,7 @@ const Chat = () => {
   }, [nftId, actor]);
 
   const initializeChat = async (id) => {
+    setIsInitializing(true);
     try {
       const response = await actor.chat(BigInt(id));
       if ('Ok' in response) {
@@ -39,6 +41,9 @@ const Chat = () => {
     } catch (error) {
       console.error('Error initiating chat:', error);
       // Handle error, maybe show a message to the user
+    }
+    finally{
+      setIsInitializing(false);
     }
   };
 
@@ -63,16 +68,18 @@ const Chat = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const responseData = await response.json();
-      
+
       const rawMarkdown = responseData.answer || 'No answer provided';
       console.log("Raw Markdown:", rawMarkdown);
       const sanitizedHtml = DOMPurify.sanitize(marked(rawMarkdown));
 
       
-      const newBotMessage = {
-        type: 'bot',
-        content: sanitizedHtml
-      };
+    const wrappedHtml = `<div class="bot-response">${sanitizedHtml}</div>`;
+
+    const newBotMessage = {
+      type: 'bot',
+      content: wrappedHtml
+    };
       setChatHistory(prevHistory => [...prevHistory, newBotMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -105,12 +112,16 @@ const Chat = () => {
         )}
       </div>
       <div className="chat-input-container">
+      {isInitializing && (
+          <div className="initializing-message">Loading your model...</div>
+        )}
         <input
           className="chat-input"
           type="text"
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="Type your message..."
+          // disabled={isLoading || isInitializing}
         />
         <button 
           className="send-button"
