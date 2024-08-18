@@ -354,3 +354,65 @@ body {
 .css-f6vpyr {
   background-color: transparent !important;
 }
+
+
+.api-dialog-content {
+  padding: 24px;
+  min-width: 400px;
+  background-color: #121212;
+  color: white;
+}
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.api-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.api-label {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.api-value-container {
+  display: flex;
+  align-items: center;
+  background-color: #2a2a2a;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.api-value {
+  flex-grow: 1;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 10px;
+}
+
+.copy-button {
+  background-color: #3a3a3a;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.copy-button:hover {
+  background-color: #4a4a4a;
+}
+
+
+.css-1qmc5dd{
+  background-color: black !important;
+  border-radius: 10px !important; 
+}

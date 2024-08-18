@@ -11,7 +11,8 @@ import {
   DialogTitle, 
   DialogContent, 
   Button, 
-  Box
+  Box,
+  CircularProgress
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import './styles/Collections.css'; // Import the NFT_Minter styles
@@ -100,7 +101,9 @@ const NFTCollection = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [principal, setPrincipal] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [Api,setApi] = useState("");
+  const [isApiDialogOpen, setIsApiDialogOpen] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [isApiLoading, setIsApiLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -191,22 +194,25 @@ const NFTCollection = () => {
   };
 
   const handleApiClick = async (id) => {
+    setIsDialogOpen(false);
+    setIsApiDialogOpen(true);
+    setIsApiLoading(true);
     try {
       const response = await actor.generate_api_key(BigInt(id));
       if ('Ok' in response) {
         const { api_key } = response.Ok;
-        console.log("API Key:", api_key);
-        setApi(api_key);
+        setApiKey(api_key);
       } else {
         console.error("Unexpected response format:", response);
         // Handle error, maybe show a message to the user
       }
     } catch (error) {
-      console.error('Error initiating chat:', error);
+      console.error('Error generating API key:', error);
       // Handle error, maybe show a message to the user
+    } finally {
+      setIsApiLoading(false);
     }
-
-  }
+  };
 
   const truncateAddress = (address) => {
     if (typeof address !== 'string') return 'Invalid Address';
@@ -214,21 +220,26 @@ const NFTCollection = () => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+
+
+  // const handleCloseAlert = () => {
+  //   setApi(null);
+  // };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      // You can add a notification here to inform the user that the address was copied
-      console.log('Address copied to clipboard');
+      // You can add a notification here to inform the user that the text was copied
+      console.log('Text copied to clipboard');
     }, (err) => {
       console.error('Could not copy text: ', err);
     });
   };
 
-  const handleCloseAlert = () => {
-    setApi(null);
-  };
+  const apiEndpoint = "https://1889-115-117-107-100.ngrok-free.app"; // Replace with your actual API endpoint
+
   return (
     <div className="nft-collection">
-        <Snackbar 
+        {/* <Snackbar 
         open={!!Api} 
         autoHideDuration={6000} 
         onClose={handleCloseAlert}
@@ -237,7 +248,7 @@ const NFTCollection = () => {
         <Alert onClose={handleCloseAlert} severity="success" sx={{ width: '100%' }}>
           API Key generated: {Api}
         </Alert>
-      </Snackbar>
+      </Snackbar> */}
       <div className="top-bar">
         <div className="logo">RAG BOT</div>
         {principal && (
@@ -318,6 +329,37 @@ const NFTCollection = () => {
       )}
     </DialogContent>
   </Dialog>
+
+  <Dialog open={isApiDialogOpen} onClose={() => setIsApiDialogOpen(false)} maxWidth="md">
+        <DialogContent className="api-dialog-content">
+          {isApiLoading ? (
+               <div className="loading-container">
+               <CircularProgress />
+             </div>
+          ) : (
+            <>
+              <div className="api-item">
+                <span className="api-label">API Key:</span>
+                <div className="api-value-container">
+                  <span className="api-value">{apiKey}</span>
+                  <button className="copy-button" onClick={() => copyToClipboard(apiKey)}>
+                    Copy
+                  </button>
+                </div>
+              </div>
+              <div className="api-item">
+                <span className="api-label">API Endpoint:</span>
+                <div className="api-value-container">
+                  <span className="api-value">{apiEndpoint}</span>
+                  <button className="copy-button" onClick={() => copyToClipboard(apiEndpoint)}>
+                    Copy
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
