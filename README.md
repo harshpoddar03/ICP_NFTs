@@ -241,7 +241,7 @@ Remember to commit your changes regularly and push to your version control syste
 ## Litepaper
 
 <!-- <img src="./Assets/paper.png" alt="NeuraNFT" width="800"> -->
-[Download the project documentation](./NeuraNFT_Litepaper.pdf)
+[Download the project documentation](./Assets//NeuraNFT_Litepaper.pdf)
 
 ## Challenges we ran into
 
