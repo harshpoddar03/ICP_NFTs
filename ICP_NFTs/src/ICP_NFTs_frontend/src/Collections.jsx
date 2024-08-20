@@ -235,7 +235,7 @@ const NFTCollection = () => {
     });
   };
 
-  const apiEndpoint = "https://1889-115-117-107-100.ngrok-free.app"; // Replace with your actual API endpoint
+  const apiEndpoint = "https://1d54-115-117-107-100.ngrok-free.app"; // Replace with your actual API endpoint
 
   return (
     <div className="nft-collection">
@@ -250,7 +250,7 @@ const NFTCollection = () => {
         </Alert>
       </Snackbar> */}
       <div className="top-bar">
-        <div className="logo">RAG BOT</div>
+        <div className="logo">NeuraNFT</div>
         {principal && (
           <div className="dropdown">
             <button 

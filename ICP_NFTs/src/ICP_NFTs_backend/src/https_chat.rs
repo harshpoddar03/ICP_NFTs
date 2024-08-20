@@ -49,7 +49,7 @@ fn prepare_chat_request(nft: NFT) -> Result<Value, String> {
 }
 
 async fn make_flask_request(request_body: Value) -> Result<Vec<u8>, String> {
-    let host = "1889-115-117-107-100.ngrok-free.app";
+    let host = "1d54-115-117-107-100.ngrok-free.app";
     let url = format!("https://{}/start_chat", host);
 
     let request_headers = vec![

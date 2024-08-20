@@ -119,7 +119,7 @@ const NFTMinter = () => {
   return (
     <div className="nft-minter" style={{ backgroundImage: `url(${tempImage})` }}>
       <div className="top-bar">
-        <div className="logo">RAG BOT</div>
+        <div className="logo">NeuraNFT</div>
         {isAuthenticated && (
           <div className="dropdown">
             <button 

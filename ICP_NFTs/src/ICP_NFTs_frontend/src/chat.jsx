@@ -217,7 +217,7 @@ const Chat = () => {
     setUserInput('');
 
     try {
-      const response = await fetch('https://1889-115-117-107-100.ngrok-free.app/chat', {
+      const response = await fetch('https://1d54-115-117-107-100.ngrok-free.app/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
