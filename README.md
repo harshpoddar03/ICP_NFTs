@@ -205,6 +205,37 @@ Note: If `assetStorage.did` is not added automatically, you may need to add it m
 
 Remember to commit your changes regularly and push to your version control system.
 
+## Demonstration
+
+<video width="800" controls>
+  <source src="./Assets/NeuraNFT.mp4" type="video/mp4">
+  <h2 align="center">NeuraNFT</h2>
+  </video>
+
+## Image
+
+<div align="center">
+  <img src="./Assets/Homepage.png" alt="NeuraNFT" width="800">
+  <h2 align="center">NeuraNFT</h2>
+
+  <img src="./Assets/form.png" alt="NeuraNFT" width="800">
+  <h2 align="center">Create NFT</h2>
+   
+   <img src="./Assets/Collections.png" alt="NeuraNFT" width="800">
+  <h2 align="center">Collections</h2>
+
+   <img src="./Assets/chat_api.png" alt="NeuraNFT" width="800">
+  <h2 align="center">Option to Chat or get API</h2>
+
+   <img src="./Assets/API.png" alt="NeuraNFT" width="800">
+  <h2 align="center">API KEY</h2>
+
+   <img src="./Assets/chat.png" alt="NeuraNFT" width="800">
+  <h2 align="center">Chat Interface</h2>
+
+
+</div>
+
 ## Challenges we ran into
 
 1. Implementing HTTPS outcalls in ICP
