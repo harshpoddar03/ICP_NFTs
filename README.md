@@ -210,7 +210,7 @@ Remember to commit your changes regularly and push to your version control syste
 <video width="800" controls>
   <source src="./Assets/NeuraNFT.mp4" type="video/mp4">
   <h2 align="center">NeuraNFT</h2>
-  </video>
+</video>
 
 ## Image
 
