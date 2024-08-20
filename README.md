@@ -15,13 +15,14 @@ NeuraNFT is a blockchain-based AI system built on the Internet Computer Protocol
    - [Generating Candid Interface](#generating-candid-interface)
 5. [Development Workflow](#development-workflow)
 6. [Demonstration](#demonstration)
-7. [Overview](#overview)
-8. [Challenges we ran into](#challenges-we-ran-into)
-9. [Accomplishments that we're proud of](#accomplishments-that-were-proud-of)
-10. [What we learned](#what-we-learned)
-11. [What's next for NeuraNFT](#whats-next-for-neuranft)
-12. [Contributing](#contributing)
-13. [Litepaper](#litepaper)
+7. [Litepaper](#litepaper)
+8. [Overview](#overview)
+9. [Challenges we ran into](#challenges-we-ran-into)
+10. [Accomplishments that we're proud of](#accomplishments-that-were-proud-of)
+11. [What we learned](#what-we-learned)
+12. [What's next for NeuraNFT](#whats-next-for-neuranft)
+
+
 
 ## Inspiration
 
