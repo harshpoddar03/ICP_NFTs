@@ -49,11 +49,11 @@ Through this approach, NeuraNFT seeks to democratize AI technology, fostering a 
 
 ## How we built it
 
-- Blockchain: Internet Computer Protocol (ICP)
-- AI Model Backend: Ollama with LLaMA 3.1
-- Containerization: Docker
-- Smart Contracts: ICP canisters
-- Prototype: Single HPC node (plans for future decentralization)
+We built NeuraNFT using a combination of blockchain technology, specifically the Internet Computer Protocol (ICP), and high-performance computing infrastructure. The system utilizes smart contracts (canisters in ICP) for managing NFTs, user authentication, and interaction with the HPC nodes.
+
+For our AI model backend, we used Ollama to work with LLaMA 3.1 as our base model. We chose LLaMA 3.1 for its powerful language understanding capabilities and Ollama for its efficient management of large language models. To ensure scalability and ease of deployment, we containerized our Ollama setup using Docker.
+
+We implemented a prototype using a single HPC node for AI model training, fine-tuning, and inference, with plans to transition to a fully decentralized, blockchain-based compute network in the future. This approach allowed us to demonstrate the core functionalities of NeuraNFT while laying the groundwork for a more distributed system.
 
 ## Getting Started
 
