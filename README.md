@@ -14,13 +14,14 @@ NeuraNFT is a blockchain-based AI system built on the Internet Computer Protocol
    - [Canister Management](#canister-management)
    - [Generating Candid Interface](#generating-candid-interface)
 5. [Development Workflow](#development-workflow)
-6. [Challenges we ran into](#challenges-we-ran-into)
-7. [Accomplishments that we're proud of](#accomplishments-that-were-proud-of)
-8. [What we learned](#what-we-learned)
-9. [What's next for NeuraNFT](#whats-next-for-neuranft)
-10. [Contributing](#contributing)
-11. [License](#license)
-12. [Contact](#contact)
+6. [Demonstration](#demonstration)
+7. [Overview](#overview)
+8. [Challenges we ran into](#challenges-we-ran-into)
+9. [Accomplishments that we're proud of](#accomplishments-that-were-proud-of)
+10. [What we learned](#what-we-learned)
+11. [What's next for NeuraNFT](#whats-next-for-neuranft)
+12. [Contributing](#contributing)
+13. [Litepaper](#litepaper)
 
 ## Inspiration
 
@@ -176,7 +177,7 @@ cargo test --package ICP_NFTs_backend -- tests::generate_candid --exact --nocapt
 
 Note: If `assetStorage.did` is not added automatically, you may need to add it manually to your project.
 
-## Development Workflow
+I## Development Workflow
 
 1. **Start the local network**:
    ```bash
@@ -207,34 +208,35 @@ Remember to commit your changes regularly and push to your version control syste
 
 ## Demonstration
 
-<video width="800" controls>
-  <source src="./Assets/NeuraNFT.mp4" type="video/mp4">
-  <h2 align="center">NeuraNFT</h2>
-  </video>
+<iframe width="800" height="450" src="https://www.youtube.com/embed/nP9tswp5STo" frameborder="0" allowfullscreen></iframe>
 
-## Image
+## Overview
 
 <div align="center">
   <img src="./Assets/Homepage.png" alt="NeuraNFT" width="800">
-  <h2 align="center">NeuraNFT</h2>
 
   <img src="./Assets/form.png" alt="NeuraNFT" width="800">
-  <h2 align="center">Create NFT</h2>
+
    
-   <img src="./Assets/Collections.png" alt="NeuraNFT" width="800">
-  <h2 align="center">Collections</h2>
+   <img src="./Assets/collections.png" alt="NeuraNFT" width="800">
+
 
    <img src="./Assets/chat_api.png" alt="NeuraNFT" width="800">
-  <h2 align="center">Option to Chat or get API</h2>
+
 
    <img src="./Assets/API.png" alt="NeuraNFT" width="800">
-  <h2 align="center">API KEY</h2>
+
 
    <img src="./Assets/chat.png" alt="NeuraNFT" width="800">
-  <h2 align="center">Chat Interface</h2>
+
 
 
 </div>
+
+## Litepaper
+
+<!-- <img src="./Assets/paper.png" alt="NeuraNFT" width="800"> -->
+[Download the project documentation](./Litepaper.pdf)
 
 ## Challenges we ran into
 
@@ -272,9 +274,3 @@ Remember to commit your changes regularly and push to your version control syste
 9. Expand AI capabilities for various data types and continuous learning
 10. Focus on real-world integration (IoT, enterprise solutions)
 
-## License
-
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
----
-
-NeuraNFT is committed to revolutionizing how AI models are created, owned, and utilized in a decentralized world.
