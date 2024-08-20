@@ -208,7 +208,11 @@ Remember to commit your changes regularly and push to your version control syste
 
 ## Demonstration
 
-<iframe width="800" height="450" src="https://www.youtube.com/embed/nP9tswp5STo" frameborder="0" allowfullscreen></iframe>
+<video width="800" controls>
+  <source src="./Assets/NeuraNFT.mp4" type="video/mp4">
+  <p align="center">NeuraNFT</p>
+</video>
+
 
 ## Overview
 
@@ -236,7 +240,7 @@ Remember to commit your changes regularly and push to your version control syste
 ## Litepaper
 
 <!-- <img src="./Assets/paper.png" alt="NeuraNFT" width="800"> -->
-[Download the project documentation](./Litepaper.pdf)
+[Download the project documentation](./NeuraNFT_Litepaper.pdf)
 
 ## Challenges we ran into
 
