@@ -178,7 +178,7 @@ cargo test --package ICP_NFTs_backend -- tests::generate_candid --exact --nocapt
 
 Note: If `assetStorage.did` is not added automatically, you may need to add it manually to your project.
 
-I## Development Workflow
+## Development Workflow
 
 1. **Start the local network**:
    ```bash
