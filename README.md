@@ -24,25 +24,28 @@ NeuraNFT is a blockchain-based AI system built on the Internet Computer Protocol
 
 ## Inspiration
 
-NeuraNFT stemmed from a desire to customize AI models and address the value distribution gap among key stakeholders in the AI ecosystem:
+The inspiration for NeuraNFT stemmed from a personal desire to customize AI models to better suit individual needs. As I delved deeper into the AI landscape, I uncovered a significant market gap that revolved around the value distribution among key stakeholders in the AI ecosystem. This ecosystem comprises four primary stakeholders:
 
-- Data Owners
-- Model Owners
-- Hosting Platforms
-- End Users
+- **Data Owners**: Individuals or organizations that possess valuable data sets crucial for training AI models.
+- **Model Owners**: AI researchers and developers who create and refine AI algorithms and architectures.
+- **Hosting Platforms**: Infrastructure providers that offer the computational resources necessary for training and deploying AI models.
+- **End Users**: Consumers or businesses that utilize AI models for various applications.
 
-The project aims to rebalance the value proposition for all stakeholders by leveraging blockchain technology and NFTs.
+While each of these stakeholders contributes essential value to the AI ecosystem, I observed that the current market structure often fails to equitably distribute the benefits and rewards. For instance:
 
-## What it does
+- Data owners often have little control over how their data is used and rarely receive direct compensation for its value.
+- Model owners may struggle to monetize their innovations effectively, especially if they lack the resources for large-scale deployment.
+- Hosting platforms, while essential, can sometimes extract disproportionate value due to their control over infrastructure.
+- End users might face high costs or limited customization options, reducing the accessibility and applicability of AI technologies.
 
-NeuraNFT combines the privacy and security of blockchain with a decentralized HPC infrastructure to deploy machine learning models securely. Key features include:
+This realization led to the conception of NeuraNFT, a platform designed to rebalance the value proposition for all stakeholders involved. By leveraging blockchain technology and NFTs, NeuraNFT aims to:
 
-- NFT representation of AI models
-- Decentralized marketplace for buying, selling, or renting models
-- HPC node network for model training and inference
-- Advanced cryptographic techniques for computations on encrypted data
-- Tools for customizing and fine-tuning models
-- Ethical AI framework
+- Provide data owners with greater control and potential for monetization of their data.
+- Offer model owners a direct path to market their innovations and receive fair compensation.
+- Create a more competitive and decentralized hosting environment, potentially reducing costs and increasing efficiency.
+- Empower end users with more affordable, customizable, and transparent AI solutions.
+
+Through this approach, NeuraNFT seeks to democratize AI technology, fostering a more equitable, innovative, and collaborative ecosystem that benefits all participants in the AI value chain.
 
 ## How we built it
 
