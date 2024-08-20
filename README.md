@@ -1,114 +1,246 @@
-# ICP_NFTs
+# NeuraNFT: Tokenizing Intelligence
 
-We have to use wsl to use the ICP SCKs and the DFX SDKs.
+NeuraNFT is a blockchain-based AI system built on the Internet Computer Protocol (ICP), addressing the growing need for personalized, secure, and decentralized artificial intelligence.
 
-To install the DFX SDKs, run the following command in the terminal:
+## Table of Contents
+1. [Inspiration](#inspiration)
+2. [What it does](#what-it-does)
+3. [How we built it](#how-we-built-it)
+4. [Getting Started](#getting-started)
+   - [Prerequisites](#prerequisites)
+   - [Installation](#installation)
+   - [Project Setup](#project-setup)
+   - [Identity Management](#identity-management)
+   - [Canister Management](#canister-management)
+   - [Generating Candid Interface](#generating-candid-interface)
+5. [Development Workflow](#development-workflow)
+6. [Challenges we ran into](#challenges-we-ran-into)
+7. [Accomplishments that we're proud of](#accomplishments-that-were-proud-of)
+8. [What we learned](#what-we-learned)
+9. [What's next for NeuraNFT](#whats-next-for-neuranft)
+10. [Contributing](#contributing)
+11. [License](#license)
+12. [Contact](#contact)
+
+## Inspiration
+
+NeuraNFT stemmed from a desire to customize AI models and address the value distribution gap among key stakeholders in the AI ecosystem:
+
+- Data Owners
+- Model Owners
+- Hosting Platforms
+- End Users
+
+The project aims to rebalance the value proposition for all stakeholders by leveraging blockchain technology and NFTs.
+
+## What it does
+
+NeuraNFT combines the privacy and security of blockchain with a decentralized HPC infrastructure to deploy machine learning models securely. Key features include:
+
+- NFT representation of AI models
+- Decentralized marketplace for buying, selling, or renting models
+- HPC node network for model training and inference
+- Advanced cryptographic techniques for computations on encrypted data
+- Tools for customizing and fine-tuning models
+- Ethical AI framework
+
+## How we built it
+
+- Blockchain: Internet Computer Protocol (ICP)
+- AI Model Backend: Ollama with LLaMA 3.1
+- Containerization: Docker
+- Smart Contracts: ICP canisters
+- Prototype: Single HPC node (plans for future decentralization)
+
+## Getting Started
+
+### Prerequisites
+
+1. **WSL (Windows Subsystem for Linux)**: Required for using ICP SDKs and DFX SDKs on Windows. Follow [Microsoft's WSL installation guide](https://docs.microsoft.com/en-us/windows/wsl/install).
+
+2. **Rust**: A systems programming language that's blazingly fast and memory-efficient.
+
+3. **Node.js and npm**: JavaScript runtime and package manager for the frontend.
+
+4. **Internet Computer SDK (DFX)**: The main tool for developing on the Internet Computer.
+
+### Installation
+
+1. Install DFX SDK:
+   ```bash
+   sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+   ```
+   This script downloads and installs the latest version of DFX. Follow the prompts to complete the installation.
+
+2. Install Rust (if not already installed):
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   ```
+   Follow the on-screen instructions to complete the Rust installation.
+
+3. Install Node.js and npm (if not already installed):
+   ```bash
+   sudo apt update
+   sudo apt install nodejs npm
+   ```
+
+4. Add WebAssembly target for Rust:
+   ```bash
+   rustup target add wasm32-unknown-unknown
+   ```
+   This allows Rust to compile to WebAssembly, which is necessary for ICP development.
+
+### Project Setup
+
+1. Initialize the project:
+   ```bash
+   dfx new ICP_NFTs
+   cd ICP_NFTs
+   ```
+   This creates a new ICP project with the necessary file structure.
+
+2. Build the project:
+   ```bash
+   dfx build
+   ```
+   This command compiles your Rust code to WebAssembly and prepares your project for deployment.
+
+3. Create and install canisters:
+   ```bash
+   dfx canister create --all
+   dfx canister install --all
+   ```
+   These commands create canister IDs for your project and install the compiled WebAssembly modules into the canisters.
+
+4. Install frontend dependencies:
+   ```bash
+   cd src/ICP_NFTs_frontend
+   npm install
+   ```
+   This installs all necessary npm packages for the frontend.
+
+### Identity Management
+
+In ICP, identities are used to interact with the network. Here's how to manage them:
+
+1. Get wallet:
+   ```bash
+   dfx identity get-wallet
+   ```
+   This displays the address of the wallet associated with your current identity.
+
+2. Generate new identity:
+   ```bash
+   dfx identity new my_identity
+   ```
+   Replace `my_identity` with your desired identity name.
+
+3. List identities:
+   ```bash
+   dfx identity list
+   ```
+   This shows all available identities.
+
+4. Use an identity:
+   ```bash
+   dfx identity use my_identity
+   ```
+   Switch to using the specified identity.
+
+### Canister Management
+
+Canisters are the computational units in ICP. Here's how to manage them:
+
+1. View canister info:
+   ```bash
+   dfx canister info <canister_id>
+   ```
+   Replace `<canister_id>` with the ID of the canister you want to inspect.
+
+2. Update canister settings:
+   ```bash
+   dfx canister update-settings ICP_NFTs_frontend --add-controller $(dfx --identity=your-identity-name identity get-principal)
+   ```
+   This adds a new controller to the specified canister. Replace `your-identity-name` with the identity you want to use.
+
+### Generating Candid Interface
+
+Candid is the interface description language for ICP. To generate the Candid interface:
 
 ```bash
-  sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+cargo test --package ICP_NFTs_backend -- tests::generate_candid --exact --nocapture
 ```
 
-To initialize the project:
+Note: If `assetStorage.did` is not added automatically, you may need to add it manually to your project.
 
-```bash
-  dfx new ICP_NFTs
-```
+## Development Workflow
 
-To build the project:
+1. **Start the local network**:
+   ```bash
+   dfx start --background
+   ```
 
-```bash
-  dfx build
-```
+2. **Deploy your canisters**:
+   ```bash
+   dfx deploy
+   ```
 
-To run the project:
+3. **Interact with your canisters**:
+   Use `dfx canister call` to invoke canister methods.
 
-```bash
-  dfx canister create --all
-  dfx canister install --all
-```
+4. **Update your code**:
+   After making changes, rebuild and redeploy:
+   ```bash
+   dfx build
+   dfx canister install --all --mode upgrade
+   ```
 
-install rust if we don't have it:
+5. **Stop the local network**:
+   ```bash
+   dfx stop
+   ```
 
-```bash
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
+Remember to commit your changes regularly and push to your version control system.
 
-install npm if we don't have it:
+## Challenges we ran into
 
-```bash
-  sudo apt install npm
-```
+1. Implementing HTTPS outcalls in ICP
+   - Strict requirements for HTTPS, SSL, and IPv6 connectivity
+   - Explored various approaches before finding a solution
 
-install nodejs if we don't have it:
+2. Efficient AI model hosting
+   - Implemented package caching to reduce build times and data usage
 
-```bash
-  sudo apt install nodejs
-```
+## Accomplishments that we're proud of
 
-install the internet identity:
+- Learning and implementing new technologies (ICP, Rust)
+- Iterating over various architectures
+- Writing our first litepaper
+- Creating a system with the potential to democratize AI ownership and usage
 
-```bash
-  dfx identity get-wallet
-```
+## What we learned
 
-to generate the internet identity:
+- Problem-solving from multiple angles
+- Proficiency in Rust programming
+- Deploying models like LLaMA on Docker
+- Articulating complex technical concepts in a litepaper
 
-```bash
-  dfx identity new my_identity
-```
+## What's next for NeuraNFT
 
-to generate the cannister:
+1. Transition to a distributed HPC network
+2. Develop a fully blockchain-based compute system
+3. Enhance NFT functionality (model composition, fractional ownership)
+4. Create a decentralized marketplace for AI model NFTs
+5. Implement a DAO for ecosystem governance
+6. Improve interoperability with other networks and AI systems
+7. Enhance privacy and security features
+8. Develop an ethical AI framework and compliance tools
+9. Expand AI capabilities for various data types and continuous learning
+10. Focus on real-world integration (IoT, enterprise solutions)
 
-```bash
-  dfx canister create --all
-```
-to list the identity:
+## License
 
-```bash
-  dfx identity list
-```
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+---
 
-to use the identity:
-
-```bash
-  dfx identity use my_identity
-```
-
-to see canister info:
-  
-  ```bash
-    dfx canister info <canister_id>
-  ```
-
-  to change cannister access:
-
-    ```bash
-      dfx canister update-settings ICP_NFTs_frontend --add-controller $(dfx --identity=your-identity-name identity get-principal)
-    ```
-
-
-    for generating did ( temp solution )
-
-    ```bash
-    cargo test --package ICP_NFTs_backend -- tests::generate_candid --exact --nocapture
-    ```
-
-    if the assetStorage.did is not added manuually add
-    
-    error[E0463]: can't find crate for `core`
-  |
-  = note: the `wasm32-unknown-unknown` target may not be installed
-  = help: consider downloading the target with `rustup target add wasm32-unknown-unknown`
-
-  ```bash
-  rustup target add wasm32-unknown-unknown
-  ```
-
-
-  for install node_modules
-
-  ```bash
-
-  cd src/ICP_NFTs_frontend
-  npm install --prefix .
-  ```
+NeuraNFT is committed to revolutionizing how AI models are created, owned, and utilized in a decentralized world.
