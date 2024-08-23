@@ -235,7 +235,7 @@ const NFTCollection = () => {
     });
   };
 
-  const apiEndpoint = "https://1d54-115-117-107-100.ngrok-free.app"; // Replace with your actual API endpoint
+  const apiEndpoint = "https://5284-115-117-107-100.ngrok-free.app"; // Replace with your actual API endpoint
 
   return (
     <div className="nft-collection">

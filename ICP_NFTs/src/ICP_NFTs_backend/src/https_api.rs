@@ -13,7 +13,7 @@ pub struct ApiKeyResponse {
     api_key: String,
 }
 
-const HOST: &str = "1d54-115-117-107-100.ngrok-free.app"; // Replace with your actual host
+const HOST: &str = "5284-115-117-107-100.ngrok-free.app"; // Replace with your actual host
 const MASTER_API_KEY: &str = "1234567890"; // Replace with your actual master API key
 
 #[ic_cdk::update]

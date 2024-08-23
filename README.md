@@ -234,6 +234,9 @@ Remember to commit your changes regularly and push to your version control syste
 
    <img src="./Assets/chat.png" alt="NeuraNFT" width="800">
 
+   <img src="./Assets/architecture.png" alt="NeuraNFT" width="800">
+
+
 
 
 </div>
